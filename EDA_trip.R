@@ -29,6 +29,8 @@ status(trip_data)
 
 # Step 2: Analyzing categorical variables - freq(trip_data)
 
+hist(trip_data$)
+
 # Step 3: Analyzing numerical variables - plot_num(trip_data)
 
 # freq(data, path_out = ".") to export to pdf

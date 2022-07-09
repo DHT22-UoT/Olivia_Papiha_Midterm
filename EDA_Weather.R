@@ -24,6 +24,9 @@ status(weather_df)
   #zipcode can turned to factor, only 5 unique values
   #city can be factor, only 5 unique values
 
+#Adding in necessary transformations 
+weather_df$date <- as.POSIXct(weather_df$date, format="%d/%m/%y")
+
 #analyzing categorical data 
 freq(weather_df)
 #informs that precipitation_inches values of T represent 4% of the data, needs to be filtered out 

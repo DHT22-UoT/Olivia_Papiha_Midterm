@@ -106,9 +106,44 @@ joined_df <- left_join(station_trip,weather_df_2, by=c("start_date" = "date", "c
 # unique(joined_df)
 # dim(joined_df)
 joined_df <- as.data.frame(joined_df)
-
 attach(joined_df)
-joined_df_1 <- joined_df %>% select-c(id.x, bike_id, subscription_ty, zip_code, id.y, lat, long, dock_count, installation_date)
-head(joined_df_1)
-corrplot(joined_df)
 
+#removing character-names from dataframe 
+joined_df_1 <- joined_df %>% select(-c(id.x, bike_id, start_station_id, 
+                                       end_station_id, subscription_type, zip_code.x,id.y,installation_date,
+                                       start_station_name,end_station_name))
+
+#summing number of trips per day per city 
+trip_data_count <- joined_df_1 %>% group_by(start_date, city) %>% count()
+
+#joining the trip and weather data 
+joined_df_final <- left_join(trip_data_count,weather_df_2, by=c("start_date" = "date", "city"))
+
+#removing character-names after joining 
+joined_df_final_1 <- joined_df_final %>% select(-c(start_date,city))
+
+
+#dividing by city since SF has higher values than other cities
+#sf city 
+san_fran <- as.data.frame(joined_df_final_1 %>% filter(city == "San Francisco"))
+attach(san_fran)
+san_fran_1 <- san_fran %>% select(-c(start_date,city, events, zip_code))
+san_fran_1 <- na.omit(san_fran_1)
+san_fran_1 <- as.data.frame(san_fran_1)
+san_fran_1$cloud_cover <- as.numeric(san_fran_1$cloud_cover)
+#testing correlation values
+corrplot(cor(san_fran_1))
+
+
+#dividing by city since SF has higher values than other cities
+#mountain view city 
+mountain_view <- as.data.frame(joined_df_final_1 %>% filter(city == "Mountain View"))
+attach(mountain_view)
+mountain_view_1 <- mountain_view %>% select(-c(start_date,city, events, zip_code))
+mountain_view_1 <- na.omit(mountain_view_1)
+mountain_view_1 <- as.data.frame(mountain_view_1)
+mountain_view_1$cloud_cover <- as.numeric(mountain_view_1$cloud_cover)
+mountain_view_1$zip_code <- as.numeric(mountain_view_1$zip_code)
+
+#testing correlation values 
+corrplot(cor(mountain_view_1))

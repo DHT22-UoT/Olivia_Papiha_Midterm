@@ -35,7 +35,14 @@ weather_df_1 <- weather_df %>%
   #changing zipcode to be coded as factor
   mutate (zip_code = as.factor(as.character(zip_code))) %>%
   #changing city to be coded as factor 
-  mutate (city = as.factor(city))
+  mutate (city = as.factor(city)) %>% 
+  #changing mean_visibility_miles to be coded as numeric 
+  mutate (mean_visibility_miles = as.numeric(mean_visibility_miles)) %>% 
+  #changing max_wind_Speed_mph to be coded as numeric 
+  mutate (max_wind_Speed_mph = as.numeric(max_wind_Speed_mph)) %>% 
+  #changing max_gust_speed_mph to be coded as numeric 
+  mutate (max_gust_speed_mph = as.numeric(max_gust_speed_mph)) 
+  
 #analyzing categorical data 
 freq(weather_df_1)
 

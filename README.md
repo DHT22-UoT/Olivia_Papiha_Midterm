@@ -16,7 +16,11 @@ Identify outliers in the data set.Record and remove from the data set. All data 
 
 Establish the highest volume hours on weekdays. Used to build 'rush hours' into their model (lubridate package).Have to find the hours of weekdays where the trip volume is highest (eg. can try histograms). Just trip.
 
-Calculate the average utilization of bikes for each month. Just trip. 
+Determine the 10 most frequent starting stations and ending stations during the ‘rush hours’.
+
+Determine the 10 most frequent starting stations and ending stations during weekends.
+
+Calculate the average utilization of bikes for each month.
 Total time used/total time in month.
 
 # Script 3 - Just weather - Papiha
@@ -30,14 +34,10 @@ Identify outliers in the data set.Record and remove from the data set. All data 
 Identify outliers in the data set.Record and remove from the data set. All data sets.
 #1.5 *IQR  - Q1 OR 1.5*IQR + Q3
 
-# Script 5 - Trip and station joined - Olivia
 
-Determine the 10 most frequent starting stations and ending stations during the ‘rush hours’.Join station and trip.
-
-Determine the 10 most frequent starting stations and ending stations during weekends. Station and trip.
-
-# Script 6 - Weather and trip - possibly station - Papiha
+# Script 5 - Weather and trip - possibly station - Papiha
 
 Help decide whether temperature, weather events, visibility or other weather measurements has an impact on bike rental patterns. Trip and weather- possibly station. 
+
 Create a correlation matrix for the new data set using cor() function from the corrplot package.Flag the highest correlations.
 

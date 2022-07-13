@@ -7,25 +7,9 @@ library(lubridate)
 library(stats)
 
 #reading in weather and data, assigning to weather_df object
-weather_df <- read.csv("weather.csv")
+weather_df <- readRDS("weather_transform.rds")
 
-#adding transformations for variables, assigning to weather_df_1
-weather_df_1 <- weather_df %>% 
-  mutate(date = as.POSIXct(date, format="%d/%m/%y")) %>%
-  mutate (precipitation_inches = str_replace(precipitation_inches, pattern="T", replacement="0")) %>% 
-  mutate (precipitation_inches = as.numeric(precipitation_inches)) %>%
-  mutate (cloud_cover = as.factor(cloud_cover)) %>%
-  mutate (events = na_if(x=events, y="")) %>%
-  mutate (events = as.factor(events)) %>%
-  mutate (zip_code = as.factor(zip_code)) %>%
-  mutate (city = as.factor(city)) %>%
-  mutate (max_wind_Speed_mph = as.numeric(max_wind_Speed_mph)) %>%
-  mutate (max_gust_speed_mph = as.numeric(max_gust_speed_mph)) %>%
-  mutate (max_visibility_miles = as.numeric(max_visibility_miles)) %>%
-  mutate (mean_visibility_miles = as.numeric(mean_visibility_miles))
-  
-
-#removing NA values from weather_df_1, assigning to weather_df_2
+#removing NA values for unavailable dates, assigning to weather_df_2
 weather_df_2 <- weather_df_1 %>% filter(!is.na(date))
 
 #EDA indicated presence of outliers in the following variables: max_visibility_miles, 
@@ -88,3 +72,4 @@ weather_df_2 <- weather_df_2 %>%
   mutate(precipitation_inches = case_when(precipitation_inches > as.numeric(upper_precipitation) ~ as.numeric(upper_precipitation), TRUE ~ precipitation_inches)) %>% 
   mutate(precipitation_inches = case_when(precipitation_inches < as.numeric(lower_precipitation) ~ as.numeric(lower_precipitation), TRUE ~ precipitation_inches))
 
+saveRDS(weather_df_2, "weather_no_outliers.rds")

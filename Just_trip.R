@@ -7,36 +7,6 @@ library(ggplot2)
 
 trip_data <- read_csv("trip.csv")
 
-# Find the number of cancelled trips (<2min) and remove from data set 
-
-nrow(trip_data$duration < 120) # returning null?
-
-# Filter out rows more than 120s 
-trip_clean <- trip_data %>%
-  filter(duration >= 120)
-
-# removed 2,499 trips
-
-# Identify outliers in the data set. Record and remove from the data set.
-# 1.5 *IQR  - Q1 OR 1.5*IQR + Q3 to determine
-
-iqr_trip <- IQR(trip_clean$duration)
-# 404
-
-Q1 <- quantile(trip_clean$duration, .25)
-Q3 <- quantile(trip_clean$duration, .75)
-
-up <- 1.5*iqr_trip + Q3 # Upper Range  
-
-low <- 1.5*iqr_trip - Q1 # Lower Range
-
-# trip_clean = 323840 obs
-  
-trip_clean2 <- subset(trip_clean, trip_clean$duration > (low) & trip_clean$duration < (up))
-dim(trip_clean2)
-
-# trip_clean2 = 258,45 obs, removed 65,195 obs 
-
 # Establish the highest volume hours on weekdays. Use to build 'rush hours' into their model (lubridate package).
 # Have to find the hours of weekdays where the trip volume is highest (eg. can try histograms). Just trip.
 

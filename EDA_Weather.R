@@ -36,6 +36,8 @@ weather_df_1 <- weather_df %>%
   mutate (zip_code = as.factor(as.character(zip_code))) %>%
   #changing city to be coded as factor 
   mutate (city = as.factor(city)) %>% 
+  #changing max_visibility_miles to be coded as numeric 
+  mutate (max_visibility_miles = as.numeric(max_visibility_miles)) %>% 
   #changing mean_visibility_miles to be coded as numeric 
   mutate (mean_visibility_miles = as.numeric(mean_visibility_miles)) %>% 
   #changing max_wind_Speed_mph to be coded as numeric 

@@ -79,7 +79,7 @@ weather_df_1 <- weather_df %>%
   mutate (max_wind_Speed_mph = as.numeric(max_wind_Speed_mph)) %>%
   mutate (max_gust_speed_mph = as.numeric(max_gust_speed_mph)) %>%
   mutate (max_visibility_miles = as.numeric(max_visibility_miles)) %>%
-  mutate (mean_visibility_miles = as.numeric(mean_visibility_miles))
+  mutate (mean_visibility_miles = as.numeric(mean_visibility_miles)) 
 
 #removing NA values from weather_df_1, assigning to weather_df_2
 weather_df_2 <- weather_df_1 %>% filter(!is.na(date))

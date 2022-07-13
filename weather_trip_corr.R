@@ -152,8 +152,7 @@ station_trip <- station_trip %>% select(-c(id.x, bike_id, start_station_id,
                                        start_station_name,end_station_name, dock_count, long, lat))
 
 #creating dataframe grouped by number of trips per day per city, as weather-variables were provided per day
-trip_data_count <- station_trip %>% group_by(start_date, city) %>% count()
-
+trip_data_count <- station_trip %>% group_by(start_date, city) %>% count() %>% rename(trip_freq = n)
 #joining the trip and weather data 
 trip_weather_corr <- left_join(trip_data_count,weather_df_2, by=c("start_date" = "date", "city"))
 
@@ -167,7 +166,7 @@ san_fran <- san_fran %>%
   mutate(cloud_cover = as.numeric(cloud_cover)) %>%
   filter(!is.na(events)) %>%
   filter(!is.na(max_visibility_miles)) %>%
-  filter(!is.na(max_gust_speed_mph)) 
+  filter(!is.na(max_gust_speed_mph))
 corrplot(cor(san_fran))
 
 #mountain view city 

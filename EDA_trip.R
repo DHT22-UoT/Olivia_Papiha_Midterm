@@ -5,6 +5,7 @@ library(tidyverse)
 library(Hmisc)
 library(plyr)
 
+# Read trip.csv file into R
 trip_data <- read_csv("trip.csv")
 
 #### EDA for trip.data ####

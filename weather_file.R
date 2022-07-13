@@ -10,7 +10,7 @@ library(stats)
 weather_df <- readRDS("weather_transform.rds")
 
 #removing NA values for unavailable dates, assigning to weather_df_2
-weather_df_2 <- weather_df_1 %>% filter(!is.na(date))
+weather_df_2 <- weather_df %>% filter(!is.na(date))
 
 #EDA indicated presence of outliers in the following variables: max_visibility_miles, 
 #mean_visibility_miles, max_wind_Speed_mph, max_gust_speed_mph and precipitation_inches 

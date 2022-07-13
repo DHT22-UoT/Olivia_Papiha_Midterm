@@ -11,11 +11,10 @@ weather_df <- readRDS("weather_transform.rds")
 
 #removing NA values for unavailable dates, assigning to weather_df_2
 weather_df_2 <- weather_df %>% filter(!is.na(date))
-
 #EDA indicated presence of outliers in the following variables: max_visibility_miles, 
 #mean_visibility_miles, max_wind_Speed_mph, max_gust_speed_mph and precipitation_inches 
-#outliers being removed based on the IQR method 
 
+#outliers being removed based on the IQR method 
 #outlier removal attempt for max_visibility_miles, indicates that both upper and lower limit are the same 
 quartile_max_visibility_miles <- quantile(weather_df_2$max_visibility_miles, probs=c(.25, .75), na.rm = T)
 iqr_max_visibility_miles <- IQR(weather_df_2$max_visibility_miles, na.rm=T)

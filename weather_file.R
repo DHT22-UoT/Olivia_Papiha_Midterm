@@ -20,7 +20,10 @@ weather_df_1 <- weather_df %>%
   mutate (zip_code = as.factor(zip_code)) %>%
   mutate (city = as.factor(city)) %>%
   mutate (max_wind_Speed_mph = as.numeric(max_wind_Speed_mph)) %>%
-  mutate (max_gust_speed_mph = as.numeric(max_gust_speed_mph))
+  mutate (max_gust_speed_mph = as.numeric(max_gust_speed_mph)) %>%
+  mutate (max_visibility_miles = as.numeric(max_visibility_miles)) %>%
+  mutate (mean_visibility_miles = as.numeric(mean_visibility_miles))
+  
 
 #removing NA values from weather_df_1, assigning to weather_df_2
 weather_df_2 <- weather_df_1 %>% filter(!is.na(date))
@@ -34,12 +37,24 @@ quartile_max_visibility_miles <- quantile(weather_df_2$max_visibility_miles, pro
 iqr_max_visibility_miles <- IQR(weather_df_2$max_visibility_miles, na.rm=T)
 upper_lim_max_visibility_miles <- quartile_max_visibility_miles[2] + 1.5*iqr_max_visibility_miles
 lower_lim_max_visibility_miles <- quartile_max_visibility_miles[1] - 1.5*iqr_max_visibility_miles 
+#outlier removal based on percentiles:
+upper_lim_max_visibility_miles <- quantile(weather_df_2$max_visibility_miles, 0.975, na.rm=T)
+lower_lim_max_visibility_miles <- quantile(weather_df_2$max_visibility_miles, 0.025, na.rm=T)
+weather_df_2 <- weather_df_2 %>% 
+  mutate(max_visibility_miles = case_when(max_visibility_miles > as.numeric(upper_lim_max_visibility_miles) ~ as.numeric(upper_lim_max_visibility_miles), TRUE ~ max_visibility_miles)) %>% 
+  mutate(max_visibility_miles = case_when(max_visibility_miles < as.numeric(lower_lim_max_visibility_miles) ~ as.numeric(lower_lim_max_visibility_miles), TRUE ~ max_visibility_miles))
 
 #not removed for mean_visibility_miles due to outer and lower bounds being the same 
 quartile_mean_visibility_miles <- quantile(weather_df_2$mean_visibility_miles, probs=c(.25, .75), na.rm = T)
 iqr_mean_visibility_miles <- IQR(weather_df_2$mean_visibility_miles, na.rm=T)
 upper_lim_mean_visibility_miles <- quartile_mean_visibility_miles[2] + 1.5*iqr_mean_visibility_miles
 lower_lim_mean_visibility_miles <- quartile_mean_visibility_miles[1] - 1.5*iqr_mean_visibility_miles 
+#outlier removal based on percentiles:
+upper_lim_mean_visibility_miles <- quantile(weather_df_2$mean_visibility_miles, 0.975, na.rm=T)
+lower_lim_mean_visibility_miles <- quantile(weather_df_2$mean_visibility_miles, 0.025, na.rm=T)
+weather_df_2 <- weather_df_2 %>% 
+  mutate(mean_visibility_miles = case_when(max_visibility_miles > as.numeric(upper_lim_mean_visibility_miles) ~ as.numeric(upper_lim_mean_visibility_miles), TRUE ~ mean_visibility_miles)) %>% 
+  mutate(mean_visibility_miles = case_when(max_visibility_miles < as.numeric(lower_lim_mean_visibility_miles) ~ as.numeric(lower_lim_mean_visibility_miles), TRUE ~ mean_visibility_miles))
 
 #outliers removed for max_wind_Speed_mph due to outer and lower bounds being different 
 quartile_max_wind_speed_mph <- quantile(weather_df_2$max_wind_Speed_mph, probs=c(.25, .75), na.rm = T)
@@ -66,3 +81,10 @@ quartile_precipitation <- quantile(weather_df_2$precipitation_inches, probs=c(.2
 iqr_precipitation <- IQR(weather_df_2$precipitation_inches, na.rm=T)
 upper_precipitation <- quartile_precipitation[2] + 1.5*iqr_precipitation
 lower_precipitation <- quartile_precipitation[1] - 1.5*iqr_precipitation 
+#outlier removal based on percentiles:
+upper_precipitation <- quantile(weather_df_2$precipitation_inches, 0.975, na.rm=T)
+lower_precipitation <- quantile(weather_df_2$precipitation_inches, 0.025, na.rm=T)
+weather_df_2 <- weather_df_2 %>% 
+  mutate(precipitation_inches = case_when(precipitation_inches > as.numeric(upper_precipitation) ~ as.numeric(upper_precipitation), TRUE ~ precipitation_inches)) %>% 
+  mutate(precipitation_inches = case_when(precipitation_inches < as.numeric(lower_precipitation) ~ as.numeric(lower_precipitation), TRUE ~ precipitation_inches))
+

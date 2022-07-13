@@ -173,7 +173,7 @@ corrplot(cor(san_fran))
 mountain_view <- as.data.frame(trip_weather_corr %>% filter(city == "Mountain View"))
 mountain_view <- mountain_view %>%
   select(-c(start_date,city, events, zip_code)) %>%
-  mutate(cloud_cover = as.numeric(cloud_cover)) %>%
+  mutate(cloud_cover = as.numeric(as.character(cloud_cover))) %>%
   filter(!is.na(events)) %>%
   filter(!is.na(max_visibility_miles)) %>%
   filter(!is.na(max_gust_speed_mph)) 
@@ -184,18 +184,18 @@ corrplot(cor(mountain_view))
 palo_alto_view <- as.data.frame(trip_weather_corr %>% filter(city == "Palo Alto"))
 palo_alto_view <- palo_alto_view %>%
   select(-c(start_date,city, events, zip_code)) %>%
-  mutate(cloud_cover = as.numeric(cloud_cover)) %>%
+  mutate(cloud_cover = as.integer(as.character(cloud_cover))) %>%
   filter(!is.na(events)) %>%
   filter(!is.na(max_visibility_miles)) %>%
   filter(!is.na(max_gust_speed_mph)) 
 #testing correlation values 
 corrplot(cor(palo_alto_view))
-
+palo_alto_view %>% str()
 #Redwood City
 redwood_city <- as.data.frame(trip_weather_corr %>% filter(city == "Redwood City"))
 redwood_city <- redwood_city %>%
   select(-c(start_date,city, events, zip_code)) %>%
-  mutate(cloud_cover = as.numeric(cloud_cover)) %>%
+  mutate(cloud_cover = as.numeric(as.character(cloud_cover))) %>%
   filter(!is.na(events)) %>%
   filter(!is.na(max_visibility_miles)) %>%
   filter(!is.na(max_gust_speed_mph)) 

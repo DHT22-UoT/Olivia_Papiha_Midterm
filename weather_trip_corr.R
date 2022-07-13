@@ -1,12 +1,15 @@
-#Weather and Trip Correlation
+#Weather and Trip Correlation Plot
 
+#Loading libraries
 library(tidyverse)
 library(dplyr)
 library(lubridate)
 library(ggplot2)
 library(corrplot)
 
+#reading in all relevant data files 
 trip_data <- read_csv("/Users/papihajoharapurkar/Downloads/babs\ 2/trip.csv")
+station_df <- read_csv("station.csv")
 weather_df <- read_csv("weather.csv")
 
 #Data transformations for Trip Data 
@@ -39,15 +42,13 @@ trip_clean2 <- trip_clean2 %>%
 
 head(trip_clean2)
 # puts dates in recognizable formats 
-for_start_date <- mdy_hm(trip_clean2$start_date)
-for_end_date <- mdy_hm(trip_clean2$end_date)
+# for_start_date <- mdy_hm(trip_clean2$start_date)
+# for_end_date <- mdy_hm(trip_clean2$end_date)
 
-mdy_hm(trip_clean2$start_date)
-
-head(trip_clean2)
+# mdy_hm(trip_clean2$start_date)
 
 #Data Transformations for Weather Data 
-#adding transformations 
+#adding transformations to variables as seen from previous-weather-analysis 
 weather_df_1 <- weather_df %>% 
   mutate(date = as.POSIXct(date, format="%d/%m/%y")) %>%
   mutate (precipitation_inches = str_replace(precipitation_inches, pattern="T", replacement="0")) %>% 
@@ -56,76 +57,91 @@ weather_df_1 <- weather_df %>%
   mutate (events = na_if(x=events, y="")) %>%
   mutate (events = as.factor(events)) %>%
   mutate (zip_code = as.factor(zip_code)) %>%
-  mutate (city = as.factor(city))
+  mutate (city = as.factor(city)) %>% 
+  mutate (max_wind_Speed_mph = as.numeric(max_wind_Speed_mph)) %>%
+  mutate (max_gust_speed_mph = as.numeric(max_gust_speed_mph)) %>%
+  mutate (max_visibility_miles = as.numeric(max_visibility_miles)) %>%
+  mutate (mean_visibility_miles = as.numeric(mean_visibility_miles))
 
-#can still observe 1105 missing dates, will remove entirely
+#removing NA values from weather_df_1, assigning to weather_df_2
 weather_df_2 <- weather_df_1 %>% filter(!is.na(date))
 
-summary(weather_df_2)
-#remove outliers
-#exploratory data analysis showed outliers for
-#columns: max_visibility_miles, mean_visibility_miles, max_wind_Speed_mph, max_gust_speed_mph 
-
-#not removed for max_visibility_miles due to outer and lower bounds being the same 
+#outlier removal attempt for max_visibility_miles, indicates that both upper and lower limit are the same 
 quartile_max_visibility_miles <- quantile(weather_df_2$max_visibility_miles, probs=c(.25, .75), na.rm = T)
 iqr_max_visibility_miles <- IQR(weather_df_2$max_visibility_miles, na.rm=T)
 upper_lim_max_visibility_miles <- quartile_max_visibility_miles[2] + 1.5*iqr_max_visibility_miles
 lower_lim_max_visibility_miles <- quartile_max_visibility_miles[1] - 1.5*iqr_max_visibility_miles 
+#outlier removal based on percentiles:
+upper_lim_max_visibility_miles <- quantile(weather_df_2$max_visibility_miles, 0.975, na.rm=T)
+lower_lim_max_visibility_miles <- quantile(weather_df_2$max_visibility_miles, 0.025, na.rm=T)
+weather_df_2 <- weather_df_2 %>% 
+  mutate(max_visibility_miles = case_when(max_visibility_miles > as.numeric(upper_lim_max_visibility_miles) ~ as.numeric(upper_lim_max_visibility_miles), TRUE ~ max_visibility_miles)) %>% 
+  mutate(max_visibility_miles = case_when(max_visibility_miles < as.numeric(lower_lim_max_visibility_miles) ~ as.numeric(lower_lim_max_visibility_miles), TRUE ~ max_visibility_miles))
 
 #not removed for mean_visibility_miles due to outer and lower bounds being the same 
 quartile_mean_visibility_miles <- quantile(weather_df_2$mean_visibility_miles, probs=c(.25, .75), na.rm = T)
 iqr_mean_visibility_miles <- IQR(weather_df_2$mean_visibility_miles, na.rm=T)
 upper_lim_mean_visibility_miles <- quartile_mean_visibility_miles[2] + 1.5*iqr_mean_visibility_miles
 lower_lim_mean_visibility_miles <- quartile_mean_visibility_miles[1] - 1.5*iqr_mean_visibility_miles 
+#outlier removal based on percentiles:
+upper_lim_mean_visibility_miles <- quantile(weather_df_2$mean_visibility_miles, 0.975, na.rm=T)
+lower_lim_mean_visibility_miles <- quantile(weather_df_2$mean_visibility_miles, 0.025, na.rm=T)
+weather_df_2 <- weather_df_2 %>% 
+  mutate(mean_visibility_miles = case_when(max_visibility_miles > as.numeric(upper_lim_mean_visibility_miles) ~ as.numeric(upper_lim_mean_visibility_miles), TRUE ~ mean_visibility_miles)) %>% 
+  mutate(mean_visibility_miles = case_when(max_visibility_miles < as.numeric(lower_lim_mean_visibility_miles) ~ as.numeric(lower_lim_mean_visibility_miles), TRUE ~ mean_visibility_miles))
 
-#removed for mean_visibility_miles due to outer and lower bounds being the same 
+#outliers removed for max_wind_Speed_mph due to outer and lower bounds being different 
 quartile_max_wind_speed_mph <- quantile(weather_df_2$max_wind_Speed_mph, probs=c(.25, .75), na.rm = T)
 iqr_max_wind_Speed_mph <- IQR(weather_df_2$max_wind_Speed_mph, na.rm=T)
 upper_lim_max_wind_Speed_mph <- quartile_max_wind_speed_mph[2] + 1.5*iqr_max_wind_Speed_mph
 lower_lim_max_wind_Speed_mph <- quartile_max_wind_speed_mph[1] - 1.5*iqr_max_wind_Speed_mph 
-#remove values or do you want to replace the outliers with upper-lim and lower-lim values?
-weather_df_2 <- subset(weather_df_2, weather_df_2$max_wind_Speed_mph > (lower_lim_max_wind_Speed_mph) & weather_df_2$max_wind_Speed_mph < upper_lim_max_wind_Speed_mph)
+#recoding of outliers  for max_wind_Speed_mph variable to upper IQR limit if higher-than upper limit, else recoding to lower limit 
+weather_df_2 <- weather_df_2 %>%
+  mutate(max_wind_Speed_mph = case_when(max_wind_Speed_mph > as.numeric(upper_lim_max_wind_Speed_mph) ~ as.numeric(upper_lim_max_wind_Speed_mph), TRUE ~ max_wind_Speed_mph)) %>% 
+  mutate(max_wind_Speed_mph = case_when(max_wind_Speed_mph < as.numeric(lower_lim_max_wind_Speed_mph) ~ as.numeric(lower_lim_max_wind_Speed_mph), TRUE ~ max_wind_Speed_mph))
 
-#removed for mean_visibility_miles due to outer and lower bounds being the same 
+#outliers removed for max_gust_speed_mph due to outer and lower bounds being different 
 quartile_max_gust_speed_mph <- quantile(weather_df_2$max_gust_speed_mph, probs=c(.25, .75), na.rm = T)
 iqr_max_gust_speed_mph <- IQR(weather_df_2$max_gust_speed_mph, na.rm=T)
 upper_max_gust_speed_mph <- quartile_max_gust_speed_mph[2] + 1.5*iqr_max_gust_speed_mph
 lower_max_gust_speed_mph <- quartile_max_gust_speed_mph[1] - 1.5*iqr_max_gust_speed_mph 
-weather_df_2 <- subset(weather_df_2, weather_df_2$max_gust_speed_mph > (lower_max_gust_speed_mph) & weather_df_2$max_gust_speed_mph < upper_max_gust_speed_mph)
+#recoding of outliers  for max_gust_speed_mph variable to upper IQR limit if higher-than upper limit, else recoding to lower limit 
+weather_df_2 <- weather_df_2 %>% 
+  mutate(max_gust_speed_mph = case_when(max_gust_speed_mph > as.numeric(upper_max_gust_speed_mph) ~ as.numeric(upper_max_gust_speed_mph), TRUE ~ max_gust_speed_mph)) %>% 
+  mutate(max_gust_speed_mph = case_when(max_gust_speed_mph < as.numeric(lower_max_gust_speed_mph) ~ as.numeric(lower_max_gust_speed_mph), TRUE ~ max_gust_speed_mph))
 
-table(trip_clean2$zip_code)
-summary(weather_df_2)
+#outliers not removed for precipitation  due to outer and lower bounds being the same 
+quartile_precipitation <- quantile(weather_df_2$precipitation_inches, probs=c(.25, .75), na.rm = T)
+iqr_precipitation <- IQR(weather_df_2$precipitation_inches, na.rm=T)
+upper_precipitation <- quartile_precipitation[2] + 1.5*iqr_precipitation
+lower_precipitation <- quartile_precipitation[1] - 1.5*iqr_precipitation 
+#outlier removal based on percentiles:
+upper_precipitation <- quantile(weather_df_2$precipitation_inches, 0.975, na.rm=T)
+lower_precipitation <- quantile(weather_df_2$precipitation_inches, 0.025, na.rm=T)
+weather_df_2 <- weather_df_2 %>% 
+  mutate(precipitation_inches = case_when(precipitation_inches > as.numeric(upper_precipitation) ~ as.numeric(upper_precipitation), TRUE ~ precipitation_inches)) %>% 
+  mutate(precipitation_inches = case_when(precipitation_inches < as.numeric(lower_precipitation) ~ as.numeric(lower_precipitation), TRUE ~ precipitation_inches))
 
-
-#Joining station and trip to obtain trip-info
-station_df <- read_csv("station.csv")
+#Joining station to trip dataset to obtain details on city, will be used afterwards as a UID
+#Merged df assigned to station_trip object
 station_trip <- left_join(trip_clean2,station_df, by=c("start_station_name" = "name"))
 
-#Joining weather and station_file based on start_date - only 1 observation for each UID pair= date and city 
-joined_df <- left_join(station_trip,weather_df_2, by=c("start_date" = "date", "city"))
-# unique(joined_df)
-# dim(joined_df)
-joined_df <- as.data.frame(joined_df)
-attach(joined_df)
+#removing irrelevant variables from dataframe 
+station_trip <- station_trip %>% select(-c(id.x, bike_id, start_station_id, 
+                                       end_station_id, subscription_type, zip_code,id.y,installation_date,
+                                       start_station_name,end_station_name, dock_count, long, lat))
 
-#removing character-names from dataframe 
-joined_df_1 <- joined_df %>% select(-c(id.x, bike_id, start_station_id, 
-                                       end_station_id, subscription_type, zip_code.x,id.y,installation_date,
-                                       start_station_name,end_station_name))
-
-#summing number of trips per day per city 
-trip_data_count <- joined_df_1 %>% group_by(start_date, city) %>% count()
+#creating dataframe grouped by number of trips per day per city, as weather-variables were provided per day
+trip_data_count <- station_trip %>% group_by(start_date, city) %>% count()
 
 #joining the trip and weather data 
-joined_df_final <- left_join(trip_data_count,weather_df_2, by=c("start_date" = "date", "city"))
+trip_weather_corr <- left_join(trip_data_count,weather_df_2, by=c("start_date" = "date", "city"))
 
 #removing character-names after joining 
-joined_df_final_1 <- joined_df_final %>% select(-c(start_date,city))
+trip_weather_corr <- trip_weather_corr %>% select(-c(start_date,city))
 
-
-#dividing by city since SF has higher values than other cities
 #sf city 
-san_fran <- as.data.frame(joined_df_final_1 %>% filter(city == "San Francisco"))
+san_fran <- as.data.frame(trip_weather_corr %>% filter(city == "San Francisco"))
 attach(san_fran)
 san_fran_1 <- san_fran %>% select(-c(start_date,city, events, zip_code))
 san_fran_1 <- na.omit(san_fran_1)
@@ -134,16 +150,44 @@ san_fran_1$cloud_cover <- as.numeric(san_fran_1$cloud_cover)
 #testing correlation values
 corrplot(cor(san_fran_1))
 
-
-#dividing by city since SF has higher values than other cities
 #mountain view city 
-mountain_view <- as.data.frame(joined_df_final_1 %>% filter(city == "Mountain View"))
+mountain_view <- as.data.frame(trip_weather_corr %>% filter(city == "Mountain View"))
 attach(mountain_view)
 mountain_view_1 <- mountain_view %>% select(-c(start_date,city, events, zip_code))
 mountain_view_1 <- na.omit(mountain_view_1)
 mountain_view_1 <- as.data.frame(mountain_view_1)
 mountain_view_1$cloud_cover <- as.numeric(mountain_view_1$cloud_cover)
 mountain_view_1$zip_code <- as.numeric(mountain_view_1$zip_code)
-
 #testing correlation values 
 corrplot(cor(mountain_view_1))
+
+#palo alto city 
+palo_alto_view <- as.data.frame(trip_weather_corr %>% filter(city == "Palo Alto"))
+attach(palo_alto_view)
+palo_alto_view_1 <- palo_alto_view %>% select(-c(start_date,city, events, zip_code))
+palo_alto_view_1 <- na.omit(palo_alto_view_1)
+palo_alto_view_1 <- as.data.frame(palo_alto_view_1)
+palo_alto_view_1$cloud_cover <- as.numeric(palo_alto_view_1$cloud_cover)
+#testing correlation values 
+corrplot(cor(palo_alto_view_1))
+
+#Redwood City
+redwood_city <- as.data.frame(trip_weather_corr %>% filter(city == "Redwood City"))
+attach(redwood_city)
+redwood_city_1 <- redwood_city %>% select(-c(start_date,city, events, zip_code))
+redwood_city_1 <- na.omit(redwood_city_1)
+redwood_city_1 <- as.data.frame(redwood_city_1)
+redwood_city_1$cloud_cover <- as.numeric(redwood_city_1$cloud_cover)
+#testing correlation values 
+corrplot(cor(redwood_city_1))
+
+#San Jose City
+sanjose_city <- as.data.frame(trip_weather_corr %>% filter(city == "San Jose"))
+attach(sanjose_city)
+sanjose_city_1 <- sanjose_city %>% select(-c(start_date,city, events, zip_code))
+sanjose_city_1 <- na.omit(sanjose_city_1)
+sanjose_city_1 <- as.data.frame(sanjose_city_1)
+sanjose_city_1$cloud_cover <- as.numeric(sanjose_city_1$cloud_cover)
+#testing correlation values 
+corrplot(cor(sanjose_city_1))
+

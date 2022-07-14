@@ -17,7 +17,7 @@ summary(station_df)
 nrow(unique(station_df))
 
 #reading in trip file
-trip_file <- read.csv("/Users/papihajoharapurkar/Downloads/babs\ 3/trip.csv")
+trip_file <- read.csv("trip.csv")
 #determining number of unique station-names from trip-file
 length(unique(trip_file$end_station_name))
 

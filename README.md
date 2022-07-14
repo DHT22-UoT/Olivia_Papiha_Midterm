@@ -5,9 +5,12 @@ Midterm assignment Special Topics
 
 Run EDA for trip (Olivia) and weather (Papiha) 
 In separate report - figures and comments 
+- File for EDA for Trip: EDA_trip.R  
+- File for EDA for Weather: EDA_Weather.R  
 
 # Script 2 - Just trip - Olivia
-
+- File for Trip: Just_trip.R  
+ 
 Find the number of cancelled trips (trips less than 2 min). Record and remove from the data set. Just trip. 
 
 Identify outliers in the data set.Record and remove from the data set. All data sets.
@@ -24,18 +27,21 @@ Calculate the average utilization of bikes for each month.
 Total time used/total time in month.
 
 # Script 3 - Just weather - Papiha
+- File for Weather: weather_file.R  
 
 Identify outliers in the data set.Record and remove from the data set. All data sets.
 #1.5 *IQR  - Q1 OR 1.5*IQR + Q3
 
 
 # Script 4 - Just station - Papiha
+- File for Station: station_outliers.R  
 
 Identify outliers in the data set.Record and remove from the data set. All data sets.
 #1.5 *IQR  - Q1 OR 1.5*IQR + Q3
 
 
 # Script 5 - Weather and trip - possibly station - Papiha
+- File for weather and trip: weather_trip_corr.R  
 
 Help decide whether temperature, weather events, visibility or other weather measurements has an impact on bike rental patterns. Trip and weather- possibly station. 
 

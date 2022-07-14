@@ -92,7 +92,7 @@ weather_df_2 <- weather_df_2 %>%
   mutate(max_gust_speed_mph = case_when(max_gust_speed_mph < as.numeric(lower_max_gust_speed_mph) ~ as.numeric(lower_max_gust_speed_mph), TRUE ~ max_gust_speed_mph))
 
 #outliers not removed for precipitation  due to outer and lower bounds being the same 
-quartile_precipitation <- quantile(weather_df_2, probs=c(.25, .75), na.rm = T)
+quartile_precipitation <- quantile(weather_df_2$precipitation_inches, probs=c(.25, .75), na.rm = T)
 iqr_precipitation <- IQR(weather_df_2$precipitation_inches, na.rm=T)
 upper_precipitation <- quartile_precipitation[2] + 1.5*iqr_precipitation
 lower_precipitation <- quartile_precipitation[1] - 1.5*iqr_precipitation 

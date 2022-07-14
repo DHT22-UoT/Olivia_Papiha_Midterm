@@ -43,8 +43,19 @@ weather_df_1 <- weather_df %>%
   #changing max_wind_Speed_mph to be coded as numeric 
   mutate (max_wind_Speed_mph = as.numeric(max_wind_Speed_mph)) %>% 
   #changing max_gust_speed_mph to be coded as numeric 
-  mutate (max_gust_speed_mph = as.numeric(max_gust_speed_mph)) 
+  mutate (max_gust_speed_mph = as.numeric(max_gust_speed_mph)) %>%
+  #changing mean_wind_speed_mph to be coded as numeric 
+  mutate (mean_wind_speed_mph = as.numeric(mean_wind_speed_mph)) %>% 
+  #changing min_visibility_miles to be coded as numeric 
+  mutate (min_visibility_miles = as.numeric(min_visibility_miles)) %>%
+  #changing max_temperature_f to be coded as numeric 
+  mutate (max_temperature_f = as.numeric(max_temperature_f)) %>% 
+  #changing mean_temperature_f to be coded as numeric 
+  mutate (mean_temperature_f = as.numeric(mean_temperature_f)) %>% 
+  #changing min_temperature_f to be coded as numeric 
+  mutate (min_temperature_f = as.numeric(min_temperature_f)) 
   
+str(weather_df_1)
 #analyzing categorical data 
 freq(weather_df_1)
 

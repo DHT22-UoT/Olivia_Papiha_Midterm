@@ -7,22 +7,13 @@ output:
   html_document 
 ---
 
-<!-- # ```{r setup, include=FALSE} -->
-<!-- # knitr::opts_chunk$set( -->
-<!-- # 	echo = TRUE, -->
-<!-- # 	fig.path = "images/", -->
-<!-- # 	warning = FALSE -->
-<!-- # ) -->
-<!-- # knitr::include_graphics('~/Documents/Masters/SpecialTopics/Olivia_Papiha_Midterm/images') -->
-<!-- # ``` -->
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
 	echo = TRUE,
-	# fig.path = "images/",
+	fig.path = "images/",
 	warning = FALSE
 )
-# knitr::include_graphics('~/Documents/Masters/SpecialTopics/Olivia_Papiha_Midterm/images')
+knitr::include_graphics('images')
 ```
 
 ```{r libraries, include=FALSE}
@@ -37,11 +28,14 @@ library(ggplot2)
 library(corrplot)
 ```
 
-## Introduction  
-This project features the thorough exploration of the San Francisco Bay Area Bike Share dataset. This dataset provides details on quick, easy and affordable bike trips around the San Francisco Bay Area. Our goal was to explore several questions regarding to bike-patterns and weather-patterns, however we mainly focused our efforts on developing a predictive model that would be able to predict the number of bikes leaving each station and being returned to each station. 
+## Introduction
 
-## Exploratory Data Analysis for Trip Data  
-*First approach to the data*   
+This project features the thorough exploration of the San Francisco Bay Area Bike Share dataset. This dataset provides details on quick, easy and affordable bike trips around the San Francisco Bay Area. Our goal was to explore several questions regarding to bike-patterns and weather-patterns, however we mainly focused our efforts on developing a predictive model that would be able to predict the number of bikes leaving each station and being returned to each station.
+
+## Exploratory Data Analysis for Trip Data
+
+*First approach to the data*
+
 ```{r glimpse, include=FALSE}
 trip_data <- read_csv("trip.csv")
 #### EDA for trip.data ####
@@ -50,12 +44,13 @@ trip_data <- read_csv("trip.csv")
 glimpse(trip_data)
 ```
 
-In the first approach to the “trip.csv” data set, the “glimpse” function was used to obtain an overview of the data. The data set includes a total of `r nrow(trip_data)` observation with `r length(colnames(trip_data))` variables including: `r colnames(trip_data)` 
+In the first approach to the "trip.csv" data set, the "glimpse" function was used to obtain an overview of the data. The data set includes a total of `r nrow(trip_data)` observation with `r length(colnames(trip_data))` variables including: `r colnames(trip_data)`
 
 ```{r status, include=FALSE}
 status(trip_data)
 ```
-The “status” function was then used which indicated that “zip_code” was the only variable with missing values. The zip code variable had `r sum(is.na(trip_data$zip_code))` (`r  sum(is.na(trip_data$zip_code))/nrow(trip_data) * 100`% of total) missing values and 50 values equal to zero or 0.0153% of total. Since these values were less than 20% missing, they were not problematic and therefore were not removed. Moreover, the data types for each variable were obtained. All variables were set to the correct data type except for start and end dates which were coded as characters. Start and end dates will need to be changed to a date format at a later time. In addition, there were `r length(unique(trip_data$start_station_id))` unique start and end station ids, however, `r length(unique(trip_data$start_station_name))` unique start and end station names.
+
+The "status" function was then used which indicated that "zip_code" was the only variable with missing values. The zip code variable had `r sum(is.na(trip_data$zip_code))` (`r  sum(is.na(trip_data$zip_code))/nrow(trip_data) * 100`% of total) missing values and 50 values equal to zero or 0.0153% of total. Since these values were less than 20% missing, they were not problematic and therefore were not removed. Moreover, the data types for each variable were obtained. All variables were set to the correct data type except for start and end dates which were coded as characters. Start and end dates will need to be changed to a date format at a later time. In addition, there were `r length(unique(trip_data$start_station_id))` unique start and end station ids, however, `r length(unique(trip_data$start_station_name))` unique start and end station names.
 
 ```{r processing_data, include=FALSE}
 # Looking at unique values in start station name to identify duplicates
@@ -136,17 +131,18 @@ describe(trip_clean2)
 saveRDS(trip_clean2, "trip_clean2.rds")
 
 ```
-This finding prompted a deeper analysis of the start and end station names to search for duplicates or misspelled station names. Using the function “unique” two misspelled station names were identified at first glance: "Washington at Kearny" and “Post at Kearny" with the correct spelling being “Kearney”. To fix this issue, the incorrectly spelled stations names were recoded with the correct spelling. Upon a closer examination of the data set, it was observed that “San Jose Government Center" and "Santa Clara County Civic Center" are both coded under station ID 25. In addition, "Broadway at Main” and "Stanford in Redwood City" were both coded under station ID 80. As "Broadway at Main” and “San Jose Government Center" stations are not included in the “station.csv” data set, they were recoded to "Stanford in Redwood City" and "Santa Clara County Civic Center" by their respective corresponding station IDs as it was assumed the names were entered incorrectly by error. The “status” function was then used again to confirm there were now `r length(unique(trip_clean2$start_station_id))` unique stations IDs and `r length(unique(trip_clean2$start_station_name))` unique station (starting and ending) names.
 
-*Analyzing categorical variables*  
-Analysis of categorical variables using the “freq” function from the “funModelling” R package examined the frequency in which starting and ending stations were seen in trip indicated the top 10 most frequent start stations in data to be: `r head(freq(trip_clean2$start_station_name), 10)$var` (Table 1). The top 10 ending stations were similar: `r tail(freq(trip_clean2$start_station_name), 10)$var` (Table 2).
+This finding prompted a deeper analysis of the start and end station names to search for duplicates or misspelled station names. Using the function "unique" two misspelled station names were identified at first glance: "Washington at Kearny" and "Post at Kearny" with the correct spelling being "Kearney". To fix this issue, the incorrectly spelled stations names were recoded with the correct spelling. Upon a closer examination of the data set, it was observed that "San Jose Government Center" and "Santa Clara County Civic Center" are both coded under station ID 25. In addition, "Broadway at Main" and "Stanford in Redwood City" were both coded under station ID 80. As "Broadway at Main" and "San Jose Government Center" stations are not included in the "station.csv" data set, they were recoded to "Stanford in Redwood City" and "Santa Clara County Civic Center" by their respective corresponding station IDs as it was assumed the names were entered incorrectly by error. The "status" function was then used again to confirm there were now `r length(unique(trip_clean2$start_station_id))` unique stations IDs and `r length(unique(trip_clean2$start_station_name))` unique station (starting and ending) names.
+
+*Analyzing categorical variables*
+Analysis of categorical variables using the "freq" function from the "funModelling" R package examined the frequency in which starting and ending stations were seen in trip indicated the top 10 most frequent start stations in data to be: `r head(freq(trip_clean2$start_station_name), 10)$var` (Table 1). The top 10 ending stations were similar: `r tail(freq(trip_clean2$start_station_name), 10)$var` (Table 2).
 
 ```{r table_setup, include=FALSE}
 output <- freq(trip_clean2$start_station_name)
 ```
 
 ```{r table_1, echo=FALSE}
-output %>% head(10)
+output %>% head(10) %>% dplyr::rename(Station = var)
 ```
 
 Table 1: Ten most frequent starting stations overall. Number of total rides left from each station with the percent of total ride left from each station.
@@ -156,36 +152,39 @@ output_2 <- freq(trip_clean2$end_station_name)
 ```
 
 ```{r table_2, echo=FALSE}
-output_2 %>% head(10)
+output_2 %>% head(10) %>% dplyr::rename(Station = var)
 ```
+
 Table 2: Ten most frequent ending stations overall. Number of total rides arrived at each station with the percent of total ride arrived at each station.
 
-In addition, analysis of the subscription type found that `r freq(trip_data$subscription_type)$percentage[1]`% of rides are by “Subscribers” and `r freq(trip_data$subscription_type)$percentage[2]`% of rides are by “Customers”, those without a subscription (Figure 1). 
+In addition, analysis of the subscription type found that `r freq(trip_data$subscription_type)$percentage[1]`% of rides are by "Subscribers" and `r freq(trip_data$subscription_type)$percentage[2]`% of rides are by "Customers", those without a subscription (Figure 1).
 
 ```{r plot_setup, echo=FALSE, warning=FALSE}
 plot_1 <- freq(trip_data$subscription_type)
 ```
+
 Figure 1: Subscription types.
 
+*Analyzing numerical variables and addressing outliers*
 
-*Analyzing numerical variables and addressing outliers*  
 ```{r trip_dur, warning=FALSE, include=FALSE}
 Hmisc::describe(trip_data$duration)  
 ```
 
-Analysis of numerical variables using the “describe” function from the “Hmisc” R package was done to obtain information about the trip durations. The mean value of trip duration was of trips in the dataset was 1131.967 sec, with the five highest durations being 644 771, 715 339, 716 480, 720 454, and 1 727 040 seconds long and the five lowest durations all being approximately 60 seconds or less. Here, trips that were less than 2 minutes (120 seconds long) were removed from the data set using the filter function from the “tidyverse” package; about 2,499 observations were removed from the dataset after completing this step. 
+Analysis of numerical variables using the "describe" function from the "Hmisc" R package was done to obtain information about the trip durations. The mean value of trip duration was of trips in the dataset was `r Hmisc::describe(trip_data$duration)[[4]][[5]]` sec, with the five highest durations being `r Hmisc::describe(trip_data$duration)[[7]][[6]]`, `r Hmisc::describe(trip_data$duration)[[7]][[7]]`, `r Hmisc::describe(trip_data$duration)[[7]][[8]]`, `r Hmisc::describe(trip_data$duration)[[7]][[9]]`, and `r Hmisc::describe(trip_data$duration)[[7]][[10]]` seconds long and the five lowest durations all being approximately 60 seconds or less. Here, trips that were less than 2 minutes (120 seconds long) were removed from the data set using the filter function from the "tidyverse" package; about 2,499 observations were removed from the dataset after completing this step.
 
-Outliers were identified using the equation 1.5xIQR + Q3 for identifying the upper limits and 1.5xIQR - Q1 for identifying the lower limits. There were approximately 65,195 outliers if the upper and lower limits were to be removed. To prevent loss of a massive number of data points the outliers were identified and reassigned to be the upper and lower limits as opposed to removing them entirely. A histogram of duration trip frequency was created to examine the distribution and to check for any extreme skewedness (Figure 2). Using the “describe” function from the “ Hmisc” package a final check of the data was done to ensure outliers had been addressed. After modifying outliers to be either upper or lower limits, the new mean of trip duration was 598.9 seconds. The modified trip data set was named “trip_clean2” and saved as a RDS file for later use.
+Outliers were identified using the equation 1.5xIQR + Q3 for identifying the upper limits and 1.5xIQR - Q1 for identifying the lower limits. There were approximately 65,195 outliers if the upper and lower limits were to be removed. To prevent loss of a massive number of data points the outliers were identified and reassigned to be the upper and lower limits as opposed to removing them entirely. A histogram of duration trip frequency was created to examine the distribution and to check for any extreme skewedness (Figure 2). Using the "describe" function from the " Hmisc" package a final check of the data was done to ensure outliers had been addressed. After modifying outliers to be either upper or lower limits, the new mean of trip duration was 598.9 seconds. The modified trip data set was named "trip_clean2" and saved as a RDS file for later use.
 
 ```{r hist_trip_data, echo=FALSE, warning=FALSE}
 hist(trip_clean2$duration, main = "Histogram of Trip Duration", xlab = "Trip Duration in Seconds")  
 ```
+
 Figure 2: Histogram of trip durations in seconds. Note frequencies at each end of the range are large due to the reassignment of outliers to upper and lower limits.
 
+## Exploratory Data Analysis for Weather Data
 
-## Exploratory Data Analysis for Weather Data  
+*First approach to the data*
 
-*First approach to the data*  
 ```{r weather_glimpse, include=FALSE}
 #Uploading weather.dataset and assigning to weather_df object
 weather_df <- read.csv("weather.csv")
@@ -237,30 +236,34 @@ weather_df_1 <- weather_df %>%
 
 str(weather_df_1)
 ```
-To initiate our exploration of the weather.csv file, the “glimpse” function from the dplyr package was used to obtain an overview of all the variables from the weather dataset. In this primary step, the following details were noted:  
-The date column was formatted in character-form instead of as date form, which necessitated a modification to the latter form. In addition, the max_temperature_f, mean_temperature_f and min_temperature_f variables, along with the max_visibility_miles, mean_visibility_miles, min_visibility_miles variables, and the max_wind_Speed_mph, mean_wind_speed_mph, max_gust_speed_mph variables were provided in integer form. These would need to be coded to numeric form for future analyses, such as correlation plots. Moreover, the precipitation (inches) was incorrectly coded as characters instead of integers, due to the fact that there were a few values coded as “T”. This value encodes “trace” for trace-amounts of precipitation, and would need to be changed to 0. The cloud-cover variable seems to be coded as an integer but could be coded as a factor as there are different categories of cloud-cover. In addition, the events variable seem to be properly coded as characters, however the output also indicated that there are some variables coded as “ “ which would need to be changed to NA. The zipcode variable is also correctly coded as an integer, but should be coded as a factor. Based on this initial examination, the variables were recoded and reformatted before performing any of the future steps of the EDA. 
 
-*Analyzing categorical variables*  
-The next approach to the exploratory analysis involved performing an assessment of the categorical data through the “freq” function. There were only a few categorical variables assessed, these encompassed the cloud_cover, events, zip_code and city variables and the most relevant plots are shown here. The output revealed that there were 9 levels of the cloud_cover variable, ranging in frequency with 0-cloud cover being the most frequent and 8-cloud_cover category as being the least frequent as shown in Figure 3A. In addition, the events variable indicated that 80.71% (representing 1473 data values) of the data was composed of NA-values, with the next most frequent events composing of rain and fog. Lastly, there were 5 levels associated with the cities, related to the 5 levels of zipcodes, which are evenly distributed in frequency, as shown by Figure 3B.   
+To initiate our exploration of the weather.csv file, the "glimpse" function from the dplyr package was used to obtain an overview of all the variables from the weather dataset. In this primary step, the following details were noted:\
+The date column was formatted in character-form instead of as date form, which necessitated a modification to the latter form. In addition, the max_temperature_f, mean_temperature_f and min_temperature_f variables, along with the max_visibility_miles, mean_visibility_miles, min_visibility_miles variables, and the max_wind_Speed_mph, mean_wind_speed_mph, max_gust_speed_mph variables were provided in integer form. These would need to be coded to numeric form for future analyses, such as correlation plots. Moreover, the precipitation (inches) was incorrectly coded as characters instead of integers, due to the fact that there were a few values coded as "T". This value encodes "trace" for trace-amounts of precipitation, and would need to be changed to 0. The cloud-cover variable seems to be coded as an integer but could be coded as a factor as there are different categories of cloud-cover. In addition, the events variable seem to be properly coded as characters, however the output also indicated that there are some variables coded as " " which would need to be changed to NA. The zipcode variable is also correctly coded as an integer, but should be coded as a factor. Based on this initial examination, the variables were recoded and reformatted before performing any of the future steps of the EDA.
+
+*Analyzing categorical variables*\
+The next approach to the exploratory analysis involved performing an assessment of the categorical data through the "freq" function. There were only a few categorical variables assessed, these encompassed the cloud_cover, events, zip_code and city variables and the most relevant plots are shown here. The output revealed that there were 9 levels of the cloud_cover variable, ranging in frequency with 0-cloud cover being the most frequent and 8-cloud_cover category as being the least frequent as shown in Figure 3A. In addition, the events variable indicated that 80.71% (representing 1473 data values) of the data was composed of NA-values, with the next most frequent events composing of rain and fog. Lastly, there were 5 levels associated with the cities, related to the 5 levels of zipcodes, which are evenly distributed in frequency, as shown by Figure 3B.
+
 ```{r weather_categorical, include=FALSE}
 #analyzing categorical data 
 output_weather <- freq(weather_df_1)
 ```
-![Frequency of Weather Events](images/weather_categorical-2.png)
+
+![FrequencyofWeatherEvents](images/weather_categorical-2.png)
 ![Frequency of Dates](images/weather_categorical-4.png)
 
 Figure 3: Assessment of Categorical Variables. A) Frequency of Weather Events (Left) B) Frequency of Dates for Each City (Right)
 
-*Analyzing numerical variables*  
-After assessing the categorical variables, the variables remaining were numerical in form, and were thus explored through the plot_num function. For this function, barplots were provided for all the numerical variables, which helped us develop initial insights into each of variables as can be seen in Figure 4. The minimum-visibility (miles), maximum-gust-speed (mph) variables, along with max_gust_speed_mph and precipitation_inches variables show relatively skewed and unbalanced distributions which can be attributed to the presence of outliers that would need to be removed, supporting previous analyses. The remaining numerical variables seem to have a relatively normal distribution, without any discerning outliers.  
+*Analyzing numerical variables*\
+After assessing the categorical variables, the variables remaining were numerical in form, and were thus explored through the plot_num function. For this function, barplots were provided for all the numerical variables, which helped us develop initial insights into each of variables as can be seen in Figure 4. The minimum-visibility (miles), maximum-gust-speed (mph) variables, along with max_gust_speed_mph and precipitation_inches variables show relatively skewed and unbalanced distributions which can be attributed to the presence of outliers that would need to be removed, supporting previous analyses. The remaining numerical variables seem to have a relatively normal distribution, without any discerning outliers.
 
 ```{r figure_4, echo=FALSE}
 #analyzing categorical data 
 plot_num(weather_df_1)
 ```
-Figure 4: Assessment of Numerical Variables. The minimum-visibility (miles), maximum-gust-speed (mph), max_gust_speed_mph and precipitation_inches variables display skewed-distributions.  
 
-After plotting the numerical variables, the profiling-num function was performed to obtain an understanding of each variable’s distribution and range. This function demonstrated that there is a high standard deviation for the max_temperature_f, mean_temperature_f, min_temperature_f, max_wind_Speed_mph and max_gust_speed_mph variables. In addition, the variation coefficient demonstrated that the precipitation_inches variable is associated with more variance as opposed to the remaining variables that are centered around the mean, inferring less accuracy associated with this variable if it were to be chosen as a possible predictor. The skewness metric informs on the measure of asymmetry, and this function demonstrated that the variables of max_visibility_miles, mean_visibility_miles, max_wind_Speed_mph, max_gust_speed_mph and precipitation_inches variables have greater skewness-values and therefore greater likelihood of observing outliers in these variables. The kurtosis variable describes the distribution for the tails, where higher number indicates presence of outliers, and this was demonstrated by the higher values shown for the max_visibility_miles, mean_visibility_miles, max_wind_Speed_mph, max_gust_speed_mph and precipitation_inches variables. There was also a high IQR range for the max_temperature_f, mean_temperature_f, and min_temperature_f variables obtained.  
+Figure 4: Assessment of Numerical Variables. The minimum-visibility (miles), maximum-gust-speed (mph), max_gust_speed_mph and precipitation_inches variables display skewed-distributions.
+
+After plotting the numerical variables, the profiling-num function was performed to obtain an understanding of each variable's distribution and range. This function demonstrated that there is a high standard deviation for the max_temperature_f, mean_temperature_f, min_temperature_f, max_wind_Speed_mph and max_gust_speed_mph variables. In addition, the variation coefficient demonstrated that the precipitation_inches variable is associated with more variance as opposed to the remaining variables that are centered around the mean, inferring less accuracy associated with this variable if it were to be chosen as a possible predictor. The skewness metric informs on the measure of asymmetry, and this function demonstrated that the variables of max_visibility_miles, mean_visibility_miles, max_wind_Speed_mph, max_gust_speed_mph and precipitation_inches variables have greater skewness-values and therefore greater likelihood of observing outliers in these variables. The kurtosis variable describes the distribution for the tails, where higher number indicates presence of outliers, and this was demonstrated by the higher values shown for the max_visibility_miles, mean_visibility_miles, max_wind_Speed_mph, max_gust_speed_mph and precipitation_inches variables. There was also a high IQR range for the max_temperature_f, mean_temperature_f, and min_temperature_f variables obtained.
 
 ```{r describe, include=FALSE}
 #full univariate analysis being performed 
@@ -272,9 +275,11 @@ describe(weather_df_1)
 #writing modified_weaher_data into weather_transform csv file
 saveRDS(weather_df_1, "weather_transform.rds")
 ```
-The describe function was used to obtain an overall overview of both the numerical and categorical variables. The date-column has `r describe(weather_df_1)$date[[4]][[3]]` unique values but `r describe(weather_df_1)$date[[4]][[1]]` dates available, with the remaining `r describe(weather_df_1)$date[[4]][[2]]` values being missing values and representing 60.5% of the date-data. These values range from 2020-01-10 to 2020-12-12. Since this date-data is being used for combining with the trip-data based on date, values with missing dates will be removed. The max_temperature_f column has `r describe(weather_df_1)$max_temperature_f[[4]][[3]]` unique values, ranging from `r describe(weather_df_1)$max_temperature_f[[5]][[1]][1]` to `r describe(weather_df_1)$max_temperature_f[[5]][[1]][46]`. For the mean_temperature_f variable, there are `r describe(weather_df_1)$mean_temperature_f[[4]][[3]]` distinct values ranging from `r describe(weather_df_1)$mean_temperature_f[[5]][[1]][[1]]` to `r describe(weather_df_1)$mean_temperature_f[[5]][[1]][[37]]`, and similarly, there are `r describe(weather_df_1)$min_temperature_f[[4]][[3]]` distinct values for the min_temperature_f variable, ranging from `r describe(weather_df_1)$min_temperature_f[[5]][[1]][[1]]` to `r describe(weather_df_1)$min_temperature_f[[5]][[1]][[37]]`. The max_visibility_miles has `r describe(weather_df_1)$max_visibility_miles[[4]][[2]]` missing values, and `r describe(weather_df_1)$max_visibility_miles[[4]][[3]]` distinct values ranging from `r describe(weather_df_1)$max_visibility_miles[[5]][[1]][[1]]` to `r describe(weather_df_1)$max_visibility_miles[[5]][[1]][[9]]`. This variable was also shown to have many outliers, which will need to be removed. The related column of mean_visibility_miles has `r describe(weather_df_1)$mean_visibility_miles[[4]][[2]]` missing values, and `r describe(weather_df_1)$mean_visibility_miles[[4]][[3]]` distinct values ranging from `r describe(weather_df_1)$mean_visibility_miles[[5]][[1]][[1]]` to `r describe(weather_df_1)$mean_visibility_miles[[5]][[1]][[17]]`, the higher values representing outlier-values will also need to be removed. The min_visibility_miles variable has `r describe(weather_df_1)$min_visibility_miles[[4]][[2]]` missing values and `r describe(weather_df_1)$min_visibility_miles[[4]][[3]]` distinct values ranging from `r describe(weather_df_1)$min_visibility_miles[[5]][[1]][[1]]` to `r describe(weather_df_1)$min_visibility_miles[[5]][[1]][[13]]`, but this column does not have any outliers as shown by previous analyses. The max_wind_Speed_mph variable has no missing values, but `r describe(weather_df_1)$max_wind_Speed_mph[[4]][[3]]` distinct values ranging from `r describe(weather_df_1)$max_wind_Speed_mph[[5]][[1]][[1]]` to `r describe(weather_df_1)$max_wind_Speed_mph[[5]][[1]][[34]]`, and this variable has been noted to contain outliers, which will be removed. The mean_wind_speed_mph variable has no missing values, but `r describe(weather_df_1)$mean_wind_speed_mph[[4]][[3]]` distinct values ranging from `r describe(weather_df_1)$mean_wind_speed_mph[[5]][[1]][[1]]` to `r describe(weather_df_1)$mean_wind_speed_mph[[5]][[1]][[20]]`, but no presence of outliers. The max_gust_speed_mph variable has `r describe(weather_df_1)$max_gust_speed_mph[[4]][[2]]` missing values, and `r describe(weather_df_1)$max_gust_speed_mph[[4]][[3]]` distinct-events, ranging from `r describe(weather_df_1)$max_gust_speed_mph[[5]][[1]][[1]]` to `r describe(weather_df_1)$max_gust_speed_mph[[5]][[1]][[43]]`, and previous analyses indicate this variable has outliers which will be removed. For the precipitation inches variable, there are `r describe(weather_df_1)$precipitation_inches[[4]][[3]]` unique values ranging from `r describe(weather_df_1)$precipitation_inches[[5]][[1]][[1]]` to `r describe(weather_df_1)$precipitation_inches[[5]][[1]][[74]]`, but this variable has been noted to contain outlier values, which will be removed. For the cloud-cover variable, there are no missing values and `r  describe(weather_df_1)$cloud_cover[[4]][[3]]` distinct events ranging from `r describe(weather_df_1)$cloud_cover[[5]][[1]][[1]]` to `r describe(weather_df_1)$cloud_cover[[5]][[1]][[9]]`, with no discernable outliers according to previous analyses. For the event variable, there are `r describe(weather_df_1)$events[[4]][[3]]` distinct-events however with `r describe(weather_df_1)$events[[4]][[2]]` missing values. For the zip-code variable, there are `r  describe(weather_df_1)$zip_code[[4]][[2]]` missing values but `r describe(weather_df_1)$zip_code[[4]][[3]]` distinct events. This variable is also similar to the output from the city-variable, which retrieved 0 missing values but `r describe(weather_df_1)$city[[4]][[3]]` distinct events, with both of these variables retrieving equivalent proportions for the frequency of each of the values. For the variables with missing values which are the date, max_visibility_miles, mean_visibility_miles, min_visibility_miles, max_gust_speed_mph and events variables, the missing-values were not recoded to 0 or other values such as mean/minimum/maximum as these entries instead represent events where values were simply not observed and recorded, and it would be incorrect to impute values in place of them.  
 
-*Addressing outliers*  
+The describe function was used to obtain an overall overview of both the numerical and categorical variables. The date-column has `r describe(weather_df_1)$date[[4]][[3]]` unique values but `r describe(weather_df_1)$date[[4]][[1]]` dates available, with the remaining `r describe(weather_df_1)$date[[4]][[2]]` values being missing values and representing 60.5% of the date-data. These values range from 2020-01-10 to 2020-12-12. Since this date-data is being used for combining with the trip-data based on date, values with missing dates will be removed. The max_temperature_f column has `r describe(weather_df_1)$max_temperature_f[[4]][[3]]` unique values, ranging from `r describe(weather_df_1)$max_temperature_f[[5]][[1]][1]` to `r describe(weather_df_1)$max_temperature_f[[5]][[1]][46]`. For the mean_temperature_f variable, there are `r describe(weather_df_1)$mean_temperature_f[[4]][[3]]` distinct values ranging from `r describe(weather_df_1)$mean_temperature_f[[5]][[1]][[1]]` to `r describe(weather_df_1)$mean_temperature_f[[5]][[1]][[37]]`, and similarly, there are `r describe(weather_df_1)$min_temperature_f[[4]][[3]]` distinct values for the min_temperature_f variable, ranging from `r describe(weather_df_1)$min_temperature_f[[5]][[1]][[1]]` to `r describe(weather_df_1)$min_temperature_f[[5]][[1]][[37]]`. The max_visibility_miles has `r describe(weather_df_1)$max_visibility_miles[[4]][[2]]` missing values, and `r describe(weather_df_1)$max_visibility_miles[[4]][[3]]` distinct values ranging from `r describe(weather_df_1)$max_visibility_miles[[5]][[1]][[1]]` to `r describe(weather_df_1)$max_visibility_miles[[5]][[1]][[9]]`. This variable was also shown to have many outliers, which will need to be removed. The related column of mean_visibility_miles has `r describe(weather_df_1)$mean_visibility_miles[[4]][[2]]` missing values, and `r describe(weather_df_1)$mean_visibility_miles[[4]][[3]]` distinct values ranging from `r describe(weather_df_1)$mean_visibility_miles[[5]][[1]][[1]]` to `r describe(weather_df_1)$mean_visibility_miles[[5]][[1]][[17]]`, the higher values representing outlier-values will also need to be removed. The min_visibility_miles variable has `r describe(weather_df_1)$min_visibility_miles[[4]][[2]]` missing values and `r describe(weather_df_1)$min_visibility_miles[[4]][[3]]` distinct values ranging from `r describe(weather_df_1)$min_visibility_miles[[5]][[1]][[1]]` to `r describe(weather_df_1)$min_visibility_miles[[5]][[1]][[13]]`, but this column does not have any outliers as shown by previous analyses. The max_wind_Speed_mph variable has no missing values, but `r describe(weather_df_1)$max_wind_Speed_mph[[4]][[3]]` distinct values ranging from `r describe(weather_df_1)$max_wind_Speed_mph[[5]][[1]][[1]]` to `r describe(weather_df_1)$max_wind_Speed_mph[[5]][[1]][[34]]`, and this variable has been noted to contain outliers, which will be removed. The mean_wind_speed_mph variable has no missing values, but `r describe(weather_df_1)$mean_wind_speed_mph[[4]][[3]]` distinct values ranging from `r describe(weather_df_1)$mean_wind_speed_mph[[5]][[1]][[1]]` to `r describe(weather_df_1)$mean_wind_speed_mph[[5]][[1]][[20]]`, but no presence of outliers. The max_gust_speed_mph variable has `r describe(weather_df_1)$max_gust_speed_mph[[4]][[2]]` missing values, and `r describe(weather_df_1)$max_gust_speed_mph[[4]][[3]]` distinct-events, ranging from `r describe(weather_df_1)$max_gust_speed_mph[[5]][[1]][[1]]` to `r describe(weather_df_1)$max_gust_speed_mph[[5]][[1]][[43]]`, and previous analyses indicate this variable has outliers which will be removed. For the precipitation inches variable, there are `r describe(weather_df_1)$precipitation_inches[[4]][[3]]` unique values ranging from `r describe(weather_df_1)$precipitation_inches[[5]][[1]][[1]]` to `r describe(weather_df_1)$precipitation_inches[[5]][[1]][[74]]`, but this variable has been noted to contain outlier values, which will be removed. For the cloud-cover variable, there are no missing values and `r  describe(weather_df_1)$cloud_cover[[4]][[3]]` distinct events ranging from `r describe(weather_df_1)$cloud_cover[[5]][[1]][[1]]` to `r describe(weather_df_1)$cloud_cover[[5]][[1]][[9]]`, with no discernable outliers according to previous analyses. For the event variable, there are `r describe(weather_df_1)$events[[4]][[3]]` distinct-events however with `r describe(weather_df_1)$events[[4]][[2]]` missing values. For the zip-code variable, there are `r  describe(weather_df_1)$zip_code[[4]][[2]]` missing values but `r describe(weather_df_1)$zip_code[[4]][[3]]` distinct events. This variable is also similar to the output from the city-variable, which retrieved 0 missing values but `r describe(weather_df_1)$city[[4]][[3]]` distinct events, with both of these variables retrieving equivalent proportions for the frequency of each of the values. For the variables with missing values which are the date, max_visibility_miles, mean_visibility_miles, min_visibility_miles, max_gust_speed_mph and events variables, the missing-values were not recoded to 0 or other values such as mean/minimum/maximum as these entries instead represent events where values were simply not observed and recorded, and it would be incorrect to impute values in place of them.
+
+*Addressing outliers*
+
 ```{r weather_outliers, include=FALSE}
 #Outlier Removal for Weather
 
@@ -391,9 +396,10 @@ weather_df_2 <- weather_df_2 %>%
 saveRDS(weather_df_2, "weather_no_outliers.rds")
 ```
 
-The previous exploratory analyses were helpful in uncovering the variables that necessitated outlier-removal in order to ensure high accuracy of future results. Firstly, we initially removed all the available data were date-information was not available for reasons explained previously.  The method of removing outliers was consistent for many of the same variables from the trip-dataset, with some exceptions, where outliers were identified using the equation 1.5xIQR + Q3 for identifying the upper limits and 1.5xIQR - Q1 for identifying the lower limits. To start, the IQR quantile and IQR functions were applied on the variable of max_visibility_miles, but since identical values for both the upper limit and lower limit were retrieved, therefore instead, another method of outlier recoding was used. This method that was used was the percentile-method, where data values were recoded to the lower and upper limits if observation values were beyond the 2.5%  or 97.5% percentile respectively. This alternative approach allowed for the successful recoding of `r sum(weather_df_2$max_visibility_miles < as.numeric(lower_lim_max_visibility_miles), na.rm=T)` lower-limit outliers and `r sum(weather_df_2$max_visibility_miles > as.numeric(upper_lim_max_visibility_miles), na.rm=T)` for upper limit of max_visibility_miles. Similarly for the mean_visibility_miles variable, identical values for the upper limit and lower limit were retrieved, and the percentile method of outlier removal was performed. This allowed for the recoding of `r sum(weather_df_2$mean_visibility_miles < as.numeric(lower_lim_mean_visibility_miles), na.rm=T)` lower-limit values and `r sum(weather_df_2$mean_visibility_miles > as.numeric(upper_lim_mean_visibility_miles), na.rm=T)` higher-limit values. The determination of disparate values for the upper and lower limit for the variable of max_wind_Speed_mph was also successful, allowing for those outlier-values to be recoded from the dataset based on the IQR method. There were `r sum(weather_df_2$max_wind_Speed_mph < as.numeric(lower_lim_max_wind_Speed_mph), na.rm=T)` lower-limit outliers recoded and `r sum(weather_df_2$max_wind_Speed_mph > as.numeric(upper_lim_max_wind_Speed_mph), na.rm=T)` higher-limit outliers recoded. The IQR method of outlier removal was also successful for the max_gust_speed_mph variable allowing for the recoding of `r sum(weather_df_2$max_gust_speed_mph < as.numeric(lower_max_gust_speed_mph), na.rm=T)` lower-limit but `r sum(weather_df_2$max_gust_speed_mph > as.numeric(upper_max_gust_speed_mph), na.rm=T)` higher limit outliers. Finally, the method of outlier removal based on percentiles was used for the variable of precipitation_inches, allowing for `r  sum(weather_df_2$precipitation_inches < as.numeric(lower_precipitation), na.rm=T)` lower-limit but `r sum(weather_df_2$precipitation_inches > as.numeric(upper_precipitation), na.rm=T)` higher-limit outliers to be recoded.  
+The previous exploratory analyses were helpful in uncovering the variables that necessitated outlier-removal in order to ensure high accuracy of future results. Firstly, we initially removed all the available data were date-information was not available for reasons explained previously. The method of removing outliers was consistent for many of the same variables from the trip-dataset, with some exceptions, where outliers were identified using the equation 1.5xIQR + Q3 for identifying the upper limits and 1.5xIQR - Q1 for identifying the lower limits. To start, the IQR quantile and IQR functions were applied on the variable of max_visibility_miles, but since identical values for both the upper limit and lower limit were retrieved, therefore instead, another method of outlier recoding was used. This method that was used was the percentile-method, where data values were recoded to the lower and upper limits if observation values were beyond the 2.5% or 97.5% percentile respectively. This alternative approach allowed for the successful recoding of `r sum(weather_df_2$max_visibility_miles < as.numeric(lower_lim_max_visibility_miles), na.rm=T)` lower-limit outliers and `r sum(weather_df_2$max_visibility_miles > as.numeric(upper_lim_max_visibility_miles), na.rm=T)` for upper limit of max_visibility_miles. Similarly for the mean_visibility_miles variable, identical values for the upper limit and lower limit were retrieved, and the percentile method of outlier removal was performed. This allowed for the recoding of `r sum(weather_df_2$mean_visibility_miles < as.numeric(lower_lim_mean_visibility_miles), na.rm=T)` lower-limit values and `r sum(weather_df_2$mean_visibility_miles > as.numeric(upper_lim_mean_visibility_miles), na.rm=T)` higher-limit values. The determination of disparate values for the upper and lower limit for the variable of max_wind_Speed_mph was also successful, allowing for those outlier-values to be recoded from the dataset based on the IQR method. There were `r sum(weather_df_2$max_wind_Speed_mph < as.numeric(lower_lim_max_wind_Speed_mph), na.rm=T)` lower-limit outliers recoded and `r sum(weather_df_2$max_wind_Speed_mph > as.numeric(upper_lim_max_wind_Speed_mph), na.rm=T)` higher-limit outliers recoded. The IQR method of outlier removal was also successful for the max_gust_speed_mph variable allowing for the recoding of `r sum(weather_df_2$max_gust_speed_mph < as.numeric(lower_max_gust_speed_mph), na.rm=T)` lower-limit but `r sum(weather_df_2$max_gust_speed_mph > as.numeric(upper_max_gust_speed_mph), na.rm=T)` higher limit outliers. Finally, the method of outlier removal based on percentiles was used for the variable of precipitation_inches, allowing for `r  sum(weather_df_2$precipitation_inches < as.numeric(lower_precipitation), na.rm=T)` lower-limit but `r sum(weather_df_2$precipitation_inches > as.numeric(upper_precipitation), na.rm=T)` higher-limit outliers to be recoded.
 
-## Outliers for Station  
+## Outliers for Station
+
 ```{r station_outliers, include=FALSE}
 #Station Outlier Removal and the Identification of Stations not in Trip Data 
 
@@ -425,10 +431,12 @@ unique_stations_end <- anti_join(trip_file,station_df, by=c("end_station_name" =
 unique(unique_stations_end$end_station_name)
 ```
 
-Alongside the weather and data-files, the station file was also examined. With the structure function, the station file was found to provide many insights. To note, the id-variables were correctly coded as numeric and station name and city variables were correctly coded in character form. Additionally, the latitude and longitude variables were also correctly coded as numeric alongside the dock-count variable. However, the installation-dates were coded as characters. In order to identify any outliers in association to the main trip-file, the number of unique rows was determined, which was retrieved to be `r nrow(unique(station_df))`. After this, the number of unique stations was determined within the trip-file was determined by using the end-station-name, although this could have been replaced with start-station-name. This resulted in the total output of `r length(unique(trip_file$end_station_name))` unique values. This value’s discrepancy with the value from the station file suggested that there were 4 additional values that had been improperly coded in the trip-data file. In order to determine which station-names had been improperly coded in the trip-data, an anti-join function was applied with the trip-data and the station-file data to determine which station-names did not match with the station-data. This function found that the `r unique(unique_stations_end$end_station_name)` values had not been provided in the station-data and must have been therefore, been improperly coded in the trip-file data.       
+Alongside the weather and data-files, the station file was also examined. With the structure function, the station file was found to provide many insights. To note, the id-variables were correctly coded as numeric and station name and city variables were correctly coded in character form. Additionally, the latitude and longitude variables were also correctly coded as numeric alongside the dock-count variable. However, the installation-dates were coded as characters. In order to identify any outliers in association to the main trip-file, the number of unique rows was determined, which was retrieved to be `r nrow(unique(station_df))`. After this, the number of unique stations was determined within the trip-file was determined by using the end-station-name, although this could have been replaced with start-station-name. This resulted in the total output of `r length(unique(trip_file$end_station_name))` unique values. This value's discrepancy with the value from the station file suggested that there were 4 additional values that had been improperly coded in the trip-data file. In order to determine which station-names had been improperly coded in the trip-data, an anti-join function was applied with the trip-data and the station-file data to determine which station-names did not match with the station-data. This function found that the `r unique(unique_stations_end$end_station_name)` values had not been provided in the station-data and must have been therefore, been improperly coded in the trip-file data.
 
-## Rush-Hours and 10-Most Frequent Starting/Ending Stations  
-*Establishing the Highest Volume Hours on Weekdays*  
+## Rush-Hours and 10-Most Frequent Starting/Ending Stations
+
+*Establishing the Highest Volume Hours on Weekdays*
+
 ```{r rush_hours, include=FALSE}
 ### Script 2 - just trip ####
 
@@ -454,16 +462,17 @@ rush_hours <- trip_clean2 %>%
  
 ```
 
-The modified “trip_clean2.rds” was imported and will be the main analysis on the trip data set moving forward. In order to establish highest volume hours on weekdays, the start and end trip dates first had to be recognizable as dates. Using the “as.POSIXct” function the dates were converted from characters to dates. A new data frame called “rush_hours” was created, and using the “tidyverse” package, weekends, which were assigned value of 1 (for Sunday) and 7 (for Saturday) using the “wday” function, were filtered out from the starting dates in the data frame. A new column of hours, corresponding to the time in the starting dates column was created and data was grouped by starting hour. Through closer investigation by the “table” function and by using a histogram to model the data, the hours of 8:00 - 8:59am, 5:00 - 5:59pm, and 9:00 - 9:59am were the most popular times to start trips on weekdays (Figure 5). Starting times were chosen to represent rush hours as this would be the times that customers were picking up bikes and would therefore be the times when the shop is most busy with customers.  
+The modified "trip_clean2.rds" was imported and will be the main analysis on the trip data set moving forward. In order to establish highest volume hours on weekdays, the start and end trip dates first had to be recognizable as dates. Using the "as.POSIXct" function the dates were converted from characters to dates. A new data frame called "rush_hours" was created, and using the "tidyverse" package, weekends, which were assigned value of 1 (for Sunday) and 7 (for Saturday) using the "wday" function, were filtered out from the starting dates in the data frame. A new column of hours, corresponding to the time in the starting dates column was created and data was grouped by starting hour. Through closer investigation by the "table" function and by using a histogram to model the data, the hours of 8:00 - 8:59am, 5:00 - 5:59pm, and 9:00 - 9:59am were the most popular times to start trips on weekdays (Figure 5). Starting times were chosen to represent rush hours as this would be the times that customers were picking up bikes and would therefore be the times when the shop is most busy with customers.
 
 ```{r figure_5, echo=FALSE}
 # Est highest vol hours for each weekday with histogram
 hist(rush_hours$hrs, main = "Histogram of Rush Hours During Weekdays", xlab = "Hour of Day", xlim = c(0,24))
 
 ```
-Figure 5: Histogram representing the most frequent times to start trips. Hours of 8:00 - 8:59 am, 5:00 - 5:59pm, and 9:00 - 9:59 am are the most frequent times for riders to start their trip on weekdays.  
 
-Rush hours of 8:00 - 8:59 am, 5:00 - 5:59pm, and 9:00 - 9:59 am on weekdays are expected values as they closely align with the workday patterns of the average 9:00am to 5:00pm worker. In addition, the least common times to start a trip are between the hours of 1:00am - 4:00 am, which are hours when most people tend to be asleep.  
+Figure 5: Histogram representing the most frequent times to start trips. Hours of 8:00 - 8:59 am, 5:00 - 5:59pm, and 9:00 - 9:59 am are the most frequent times for riders to start their trip on weekdays.
+
+Rush hours of 8:00 - 8:59 am, 5:00 - 5:59pm, and 9:00 - 9:59 am on weekdays are expected values as they closely align with the workday patterns of the average 9:00am to 5:00pm worker. In addition, the least common times to start a trip are between the hours of 1:00am - 4:00 am, which are hours when most people tend to be asleep.
 
 ```{r chunk, include=FALSE}
 
@@ -489,14 +498,14 @@ rush_hours2_tb <- rush_hours2_tb[order(rush_hours2_tb,decreasing = TRUE)]
 
 ```
 
-*Determining the 10 Most Frequent Starting and Ending Stations on Weekdays*  
-In order to determine the 10 most frequent starting stations on weekdays, the same steps were followed as to establish the rush hours for ending stations. The data frame was then grouped by starting station name and then only trips leaving at hours between 8:00 - 8:59 am, 9:00 - 9:59 am and 5:00 - 5:59 pm were included in the analysis. The starting stations and their corresponding frequencies were then put in table format and ordered from most to least frequent in terms of number of trips left during the previously specified hours. The top 10 starting stations at rush hours were:  `r as.data.frame(rush_hours2_tb[1:10])$Var1` (Table 3).
+*Determining the 10 Most Frequent Starting and Ending Stations on Weekdays*\
+In order to determine the 10 most frequent starting stations on weekdays, the same steps were followed as to establish the rush hours for ending stations. The data frame was then grouped by starting station name and then only trips leaving at hours between 8:00 - 8:59 am, 9:00 - 9:59 am and 5:00 - 5:59 pm were included in the analysis. The starting stations and their corresponding frequencies were then put in table format and ordered from most to least frequent in terms of number of trips left during the previously specified hours. The top 10 starting stations at rush hours were: `r as.data.frame(rush_hours2_tb[1:10])$Var1` (Table 3).
 
-```{r table_3, include=FALSE}
-as.data.frame(rush_hours2_tb[1:10])
+```{r table_3, echo=FALSE}
+as.data.frame(rush_hours2_tb[1:10]) %>% dplyr::rename(Station = Var1)
 ```
-Table 3: Ten most frequent starting stations on weekdays. Frequency of rides represents the numbers of trips left at each starting station during rush hours on weekdays.  
 
+Table 3: Ten most frequent starting stations on weekdays. Frequency of rides represents the numbers of trips left at each starting station during rush hours on weekdays.
 
 ```{r ending_hours, include=FALSE}
 
@@ -521,16 +530,17 @@ rush_hours3_tb <- table(rush_hours3$end_station_name)
 rush_hours3_tb <- rush_hours3_tb[order(rush_hours3_tb,decreasing = TRUE)]
 ```
 
-To determine the 10 most frequent ending stations during rush hours on weekdays the same process to determine rush hours for starting stations was followed. This analysis returned the same rush hours at the ending stations as the starting stations being: 8:00 - 8:59 am, 9:00 - 9:59 am and 5:00 - 5:59 pm. The new data frame for frequencies of ending stations during weekdays was then filtered to only include rush hours and then made into a table, using the “table” function and ordered from most to least frequent. In order, the top 10 most frequent ending stations during rush hours on weekdays were: `r as.data.frame(rush_hours3_tb[1:10])$Var1` (Table 4). 
+To determine the 10 most frequent ending stations during rush hours on weekdays the same process to determine rush hours for starting stations was followed. This analysis returned the same rush hours at the ending stations as the starting stations being: 8:00 - 8:59 am, 9:00 - 9:59 am and 5:00 - 5:59 pm. The new data frame for frequencies of ending stations during weekdays was then filtered to only include rush hours and then made into a table, using the "table" function and ordered from most to least frequent. In order, the top 10 most frequent ending stations during rush hours on weekdays were: `r as.data.frame(rush_hours3_tb[1:10])$Var1` (Table 4).
 
 ```{r table_4, echo=FALSE}
-as.data.frame(rush_hours3_tb[1:10])
+as.data.frame(rush_hours3_tb[1:10]) %>% dplyr::rename(Station = Var1)
 ```
-Table 4: Ten most frequent ending stations on weekdays. Frequency of rides represents the numbers of trips arriving at each ending station during rush hours on weekdays.  
 
-Apart from a few discrepancies, the most frequent starting and ending stations on weekdays appeared to mostly align with one another, which is to be expected. Specifically, the ending stations that were not included in the top 10 starting stations were Powell Street BART and Embarcadero at Sansome. Conversely, the two starting stations that were not included in the top 10 ending stations were Beale at Market and Market at 10th (Table 3-4).  
+Table 4: Ten most frequent ending stations on weekdays. Frequency of rides represents the numbers of trips arriving at each ending station during rush hours on weekdays.
 
-*Determining the 10 Most Frequent Starting and Ending Stations on Weekends*  
+Apart from a few discrepancies, the most frequent starting and ending stations on weekdays appeared to mostly align with one another, which is to be expected. Specifically, the ending stations that were not included in the top 10 starting stations were Powell Street BART and Embarcadero at Sansome. Conversely, the two starting stations that were not included in the top 10 ending stations were Beale at Market and Market at 10th (Table 3-4).
+
+*Determining the 10 Most Frequent Starting and Ending Stations on Weekends*
 
 ```{r freq_weekend_stations, include=FALSE}
 #### Determine the 10 most frequent starting stations and ending stations during weekends. ####
@@ -550,13 +560,13 @@ rush_hours_wkend_tb <- table(rush_hours_wkend$start_station_name)
 rush_hours_wkend_tb <- rush_hours_wkend_tb[order(rush_hours_wkend_tb,decreasing = TRUE)]
 ```
 
-The process for determining the most frequent stations on weekends was largely like the previous analysis except data was filtered to remove weekdays instead of weekends. A new data frame called “rush_hours_wkend” was created, and using the “tidyverse” package, weekdays, which are assigned values of 1 (Monday) to 6 (Friday) were filtered out. The 10 most frequent starting stations on weekends were: `r as.data.frame(rush_hours_wkend_tb)$Var1[1:10]` (Table 5).  
+The process for determining the most frequent stations on weekends was largely like the previous analysis except data was filtered to remove weekdays instead of weekends. A new data frame called "rush_hours_wkend" was created, and using the "tidyverse" package, weekdays, which are assigned values of 1 (Monday) to 6 (Friday) were filtered out. The 10 most frequent starting stations on weekends were: `r as.data.frame(rush_hours_wkend_tb)$Var1[1:10]` (Table 5).
 
 ```{r table_5, echo=FALSE}
-as.data.frame(rush_hours_wkend_tb)[1:10,]
-```
-Table 5: Ten most frequent starting stations on weekend. Frequency of rides represents the numbers of trips beginning at each starting station during weekends.  
+as.data.frame(rush_hours_wkend_tb)[1:10,] %>% dplyr::rename(Station = Var1)
+``` 
 
+Table 5: Ten most frequent starting stations on weekend. Frequency of rides represents the numbers of trips beginning at each starting station during weekends.
 
 ```{r freq_end_stations, include=FALSE}
 # Most frequent ending stations on weekends
@@ -572,16 +582,18 @@ rush_hours_wkend2_tb <- table(rush_hours_wkend2$end_station_name)
 rush_hours_wkend2_tb <- rush_hours_wkend2_tb[order(rush_hours_wkend2_tb,decreasing = TRUE)]
 ```
 
-The analysis of the most frequent end stations during weekends was done in the same way as the previous analysis, however, with the replacement of starting station to ending stations data from “trip_clean2” data set. Moreover, the results indicated a large portion of most frequent stations to be very similar to the starting station analysis, however, with slightly different ordering: `r as.data.frame(rush_hours_wkend2_tb)$Var1[1:10]` (Table 6).  
+The analysis of the most frequent end stations during weekends was done in the same way as the previous analysis, however, with the replacement of starting station to ending stations data from "trip_clean2" data set. Moreover, the results indicated a large portion of most frequent stations to be very similar to the starting station analysis, however, with slightly different ordering: `r as.data.frame(rush_hours_wkend2_tb)$Var1[1:10]` (Table 6).
 
 ```{r table_6, echo=FALSE}
-as.data.frame(rush_hours_wkend2_tb)[1:10,]
+as.data.frame(rush_hours_wkend2_tb)[1:10,] %>% dplyr::rename(Station = Var1)
 ```
+
 Table 6: Ten most frequent ending stations on weekend. Frequency of rides represents the numbers of trips finishing at each end station during on weekends.
 
-Overall, the most frequent starting/ending stations on weekends and weekdays appeared to closely align with one another. Interestingly, there appears to be a slight discrepancy in stations that are more popular on weekends versus weekdays. For example, some of the top 10 starting stations for weekends included Grant Avenue at Columbus Avenue, Powell at Post (Union Square), Embarcadero at Bryant, Embarcadero at Sansome, and Market at 4th all of which were not included in the top 10 stations starting list on weekdays. For ending stations, top 10 that were not in the ending station analysis for weekends included: Market at 4th, Embarcadero at Bryant, and Grant Avenue at Columbus Avenue. It is worth noting that San Francisco Caltrain (Townsend at 4th) and 2nd at Townsend stations-maintained popularity throughout each analysis.  
+Overall, the most frequent starting/ending stations on weekends and weekdays appeared to closely align with one another. Interestingly, there appears to be a slight discrepancy in stations that are more popular on weekends versus weekdays. For example, some of the top 10 starting stations for weekends included Grant Avenue at Columbus Avenue, Powell at Post (Union Square), Embarcadero at Bryant, Embarcadero at Sansome, and Market at 4th all of which were not included in the top 10 stations starting list on weekdays. For ending stations, top 10 that were not in the ending station analysis for weekends included: Market at 4th, Embarcadero at Bryant, and Grant Avenue at Columbus Avenue. It is worth noting that San Francisco Caltrain (Townsend at 4th) and 2nd at Townsend stations-maintained popularity throughout each analysis.
 
-## Average Utilization of Bikes  
+## Average Utilization of Bikes
+
 ```{r utilization, include=FALSE}
 
 #### Calculate the average utilization of bikes for each month. Total time used/total time in month. ####
@@ -603,13 +615,13 @@ bike_utl2 <- bike_utl2 %>%
   mutate(avg_utl_per_mon = x/sec_per_month)
 ```
 
-In order to calculate the average utilization of bikes overall per month, a new data frame called “bike_utl”  from the “trip_clean2” data frame was created. Data was first grouped by month and then an additional data frame was created and using the “aggregate” function to sum the total trip durations corresponding to each month. An additional column for the number of days in each month was added as well and a column representing the total seconds in each month which multiplies the days in the month by the average seconds in a day (86400 seconds). The total bike utilization per month was calculated by adding a column that performs a division of total seconds used per month by the total seconds in the given month. Utilization results for each month can be seen in Table 7.  
+In order to calculate the average utilization of bikes overall per month, a new data frame called "bike_utl" from the "trip_clean2" data frame was created. Data was first grouped by month and then an additional data frame was created and using the "aggregate" function to sum the total trip durations corresponding to each month. An additional column for the number of days in each month was added as well and a column representing the total seconds in each month which multiplies the days in the month by the average seconds in a day (86400 seconds). The total bike utilization per month was calculated by adding a column that performs a division of total seconds used per month by the total seconds in the given month. Utilization results for each month can be seen in Table 7.
 
 ```{r table_7, echo=FALSE}
 bike_utl2
 ```
-Table 7: Total bike utilization per month. Average utilization was calculated by dividing total duration of trips per month in seconds divided by total time in month in seconds.  
 
+Table 7: Total bike utilization per month. Average utilization was calculated by dividing total duration of trips per month in seconds divided by total time in month in seconds.
 
 ```{r weather_pre_process, include=FALSE}
 #Weather and Trip Correlation Plot
@@ -635,10 +647,11 @@ trip_weather_corr <- left_join(trip_data_count,weather_df_2, by=c("start_date" =
 
 ```
 
-## Weather and Bike Rental Patterns  
-To determine the impact of weather patterns on bike-rental patterns, the cleaned and filtered data from the previous steps were retrieved. A dataframe with both the trip-data and station-data was then made, using the left_join function. This was performed in order to obtain information regarding the city of each station, which were necessary details since the weather-dataset contained weather patterns based on each city and zipcode, but not according to station-names. After creating this merged dataframe, the variables of id (id.x corresponding to the ID from the trip-dataset), bike-ids, station and end-station ids, subscription-type and zipcodes which were originally from the trip-dataframe were removed and the variables of id (id.y corresponding to the ID from the station-data), installation-date, start-station name, end-station-name, dock-count, long and lat columns were also removed. These variables were removed as they were irrelevant to the analysis of bike-rental frequency and weather-patterns. In order to then obtain the bike-rental frequency, the data was grouped by start-date and city to obtain the total number of counts of bikes used per day per city, as opposed to variables such as duration. It was important to stratify the data by city as well as date, as the weather-data was divided by city, not only date. Therefore, the next step involved joining this newly created dataframe containing the start-date, city, and number of trips per day information with the weather-dataframe. The unique-identifiers in this case were the variables of start-date/date and city. In order to perform correlation analysis with just the numerical variables, all character or factor variables such as start_date, events, and city character-variables were moved. Then, correlation analysis was performed for each of the cities. The events-variable was removed as it was a factor/character-value, and therefore was not included in the quantitative-correlation analysis. For the following correlation plots, freq refers to the number of trips completed per day.   
+## Weather and Bike Rental Patterns
 
-For San Francisco as can be seen in Figure 6, a positive but weak correlation can be observed for the variables of max-temperature-f and mean-temperature, and a negative moderate correlation for precipitation inches, as well as a weaker negative correlation for maximum and minimum wing speed, and cloud-cover.   
+To determine the impact of weather patterns on bike-rental patterns, the cleaned and filtered data from the previous steps were retrieved. A dataframe with both the trip-data and station-data was then made, using the left_join function. This was performed in order to obtain information regarding the city of each station, which were necessary details since the weather-dataset contained weather patterns based on each city and zipcode, but not according to station-names. After creating this merged dataframe, the variables of id (id.x corresponding to the ID from the trip-dataset), bike-ids, station and end-station ids, subscription-type and zipcodes which were originally from the trip-dataframe were removed and the variables of id (id.y corresponding to the ID from the station-data), installation-date, start-station name, end-station-name, dock-count, long and lat columns were also removed. These variables were removed as they were irrelevant to the analysis of bike-rental frequency and weather-patterns. In order to then obtain the bike-rental frequency, the data was grouped by start-date and city to obtain the total number of counts of bikes used per day per city, as opposed to variables such as duration. It was important to stratify the data by city as well as date, as the weather-data was divided by city, not only date. Therefore, the next step involved joining this newly created dataframe containing the start-date, city, and number of trips per day information with the weather-dataframe. The unique-identifiers in this case were the variables of start-date/date and city. In order to perform correlation analysis with just the numerical variables, all character or factor variables such as start_date, events, and city character-variables were moved. Then, correlation analysis was performed for each of the cities. The events-variable was removed as it was a factor/character-value, and therefore was not included in the quantitative-correlation analysis. For the following correlation plots, freq refers to the number of trips completed per day.
+
+For San Francisco as can be seen in Figure 6, a positive but weak correlation can be observed for the variables of max-temperature-f and mean-temperature, and a negative moderate correlation for precipitation inches, as well as a weaker negative correlation for maximum and minimum wing speed, and cloud-cover.
 
 ```{r san_fran, echo=FALSE}
 #Correlation for San Francisco
@@ -656,9 +669,11 @@ san_fran <- san_fran %>%
 #displaying correlation values 
 corrplot(cor(san_fran))
 ```
-Figure 6: Correlation Plot for San Francisco.  
 
-For the city of Mountain View as can be seen in Figure 7, a positive but weak correlation can be seen for the variables of max-temperature-f and mean-temperature and weak negative correlations for the variables of max/mean wind speed, and gust speed. The variables of cloud-cover and precipitation inches demonstrate a marginally better, borderline moderate negative correlation.  
+Figure 6: Correlation Plot for San Francisco.
+
+For the city of Mountain View as can be seen in Figure 7, a positive but weak correlation can be seen for the variables of max-temperature-f and mean-temperature and weak negative correlations for the variables of max/mean wind speed, and gust speed. The variables of cloud-cover and precipitation inches demonstrate a marginally better, borderline moderate negative correlation.
+
 ```{r mountain_view, echo=FALSE}
 #mountain view city 
 mountain_view <- as.data.frame(trip_weather_corr %>% filter(city == "Mountain View"))
@@ -674,9 +689,11 @@ mountain_view <- mountain_view %>%
 #displaying correlation values 
 corrplot(cor(mountain_view))
 ```
-Figure 7: Correlation Plot for Mountain View.   
 
-The city of Palo Alto similarly showed a weak positive correlation for max and mean temperature, as well as for minimum visibility in miles, and a weak negative correlation for minimum visibility and precipitation inches, as well as for events-types and gust-speed. However, a moderate negative correlation for maximum and average wind speed, as well as cloud cover. Interestingly, there were not any variables that were insufficient for correlation analysis, seen by the lack of ‘?’ compared to the other plots for the other cities as seen in Figure 8.  
+Figure 7: Correlation Plot for Mountain View.
+
+The city of Palo Alto similarly showed a weak positive correlation for max and mean temperature, as well as for minimum visibility in miles, and a weak negative correlation for minimum visibility and precipitation inches, as well as for events-types and gust-speed. However, a moderate negative correlation for maximum and average wind speed, as well as cloud cover. Interestingly, there were not any variables that were insufficient for correlation analysis, seen by the lack of '?' compared to the other plots for the other cities as seen in Figure 8.
+
 ```{r palo_alto, echo=FALSE}
 #palo alto city 
 palo_alto_view <- as.data.frame(trip_weather_corr %>% filter(city == "Palo Alto"))
@@ -692,9 +709,11 @@ palo_alto_view <- palo_alto_view %>%
 #displaying correlation values 
 corrplot(cor(palo_alto_view))
 ```
-Figure 8: Correlation Plot for Palo Alto   
 
-As seen in Figure 9, which displays the correlation plot for Redwood City, there is only weak positive correlation shown for all variables, with the exception of average wind speed, which shows a borderline-moderate correlation.  
+Figure 8: Correlation Plot for Palo Alto
+
+As seen in Figure 9, which displays the correlation plot for Redwood City, there is only weak positive correlation shown for all variables, with the exception of average wind speed, which shows a borderline-moderate correlation.
+
 ```{r redwood, echo=FALSE}
 #Redwood City
 redwood_city <- as.data.frame(trip_weather_corr %>% filter(city == "Redwood City"))
@@ -710,9 +729,10 @@ redwood_city <- redwood_city %>%
 #displaying correlation values 
 corrplot(cor(redwood_city))
 ```
-Figure 9: Correlation Plot for Redwood City    
 
-For the town of San Jose as shown in Figure 10, there are weak positive correlations shown for the mean and minimum visibility variables, with borderline moderate correlation for the max/mean/min temperature variables. Moreover, a weak negative correlation for max/mean wind speeds and gust-speeds with cloud cover, and for precipitation inches is also seen.  
+Figure 9: Correlation Plot for Redwood City
+
+For the town of San Jose as shown in Figure 10, there are weak positive correlations shown for the mean and minimum visibility variables, with borderline moderate correlation for the max/mean/min temperature variables. Moreover, a weak negative correlation for max/mean wind speeds and gust-speeds with cloud cover, and for precipitation inches is also seen.
 
 ```{r san_jose, echo=FALSE}
 #San Jose City
@@ -729,9 +749,15 @@ sanjose_city <- sanjose_city %>%
 #displaying correlation values 
 corrplot(cor(sanjose_city))
 ```
-Figure 11: Correlation Plot for San Jose    
 
-To provide a summary of the weather patterns for all these plots, all the cities demonstrate a weak-positive correlation associated with the max/min/mean temperature variables where increased frequency of bike rides are associated with increased temperature. In addition, this correlation was also shown to be true for the max/minimum/mean visibility (miles) variables, where increased visibility is associated with increased frequency of bike rides. On the other hand, weak-negative correlations are demonstrated with the speed variables, where increasing speed is associated with lower frequency of bike rides. In addition to this, weak-negative correlations were exhibited for precipitation, where increased precipitation is associated with lower frequency of bike rides. Similar to this variable, greater-cloud-cover values being associated with lower frequency of bike rides. These trends were however not noticed in Redwood City, where increased frequency of bike rides were associated not only with greater temperatures but also, negative weather events such as greater wind-speed and greater precipitation or cloud-cover.  
+Figure 10: Correlation Plot for San Jose
+
+To provide a summary of the weather patterns for all these plots, all the cities demonstrate a weak-positive correlation associated with the max/min/mean temperature variables where increased frequency of bike rides are associated with increased temperature. In addition, this correlation was also shown to be true for the max/minimum/mean visibility (miles) variables, where increased visibility is associated with increased frequency of bike rides. On the other hand, weak-negative correlations are demonstrated with the speed variables, where increasing speed is associated with lower frequency of bike rides. In addition to this, weak-negative correlations were exhibited for precipitation, where increased precipitation is associated with lower frequency of bike rides. Similar to this variable, greater-cloud-cover values being associated with lower frequency of bike rides. These trends were however not noticed in Redwood City, where increased frequency of bike rides were associated not only with greater temperatures but also, negative weather events such as greater wind-speed and greater precipitation or cloud-cover.
 
 ## Conclusion
-The analysis concluded that the common rush hours during weekdays were 8:00 - 8:59 am, 9:00 - 9:59 am and 5:00 - 5:59pm. These results were consistent for both starting and ending stations and likely align with workday patterns of the average worker in the Bay Area. Overall, the bike starting and ending stations on weekdays aligned well. There were discrepancies in the most popular stations for weekends in comparison to weekdays. Specifically, the Market at 4th, Embarcadero at Bryant, and Grant Avenue at Columbus Avenue stations seemed to be busier on the weekends in comparison to weekdays. Interestingly, San Francisco Caltrain (Townsend at 4th) and 2nd at Townsend stations-maintained popularity throughout each analysis. In addition, an increase in utilization of bikes is seen in the months of July – October. Conversely, a decrease in utilization was seen in December, January, and February.  When it comes to the expected weather patterns, weather events thought to be associated with the months of July – October include increased temperatures and greater visibility, along with lower wind-speeds and lower precipitation with the converse expected to present in December, January, and February. The analysis of weather patterns also supports the previous results, where greater frequency of bike rides were shown to be associated with positive or increasing values for temperatures and greater visibility as opposed to lower frequency with greater wind-speeds and precipitation values. However, due to the limitations of missing data which necessitated missing-value imputation for the weather and trip-information, further analysis to determine the impact of weather patterns on bicycle utilization could be helpful to inform maintenance decisions. 
+
+The analysis concluded that the common rush hours during weekdays were 8:00 - 8:59 am, 9:00 - 9:59 am and 5:00 - 5:59pm. These results were consistent for both starting and ending stations and likely align with workday patterns of the average worker in the Bay Area. Overall, the bike starting and ending stations on weekdays aligned well. There were discrepancies in the most popular stations for weekends in comparison to weekdays. Specifically, the Market at 4th, Embarcadero at Bryant, and Grant Avenue at Columbus Avenue stations seemed to be busier on the weekends in comparison to weekdays. Interestingly, San Francisco Caltrain (Townsend at 4th) and 2nd at Townsend stations-maintained popularity throughout each analysis. In addition, an increase in utilization of bikes is seen in the months of July -- October. Conversely, a decrease in utilization was seen in December, January, and February. When it comes to the expected weather patterns, weather events thought to be associated with the months of July -- October include increased temperatures and greater visibility, along with lower wind-speeds and lower precipitation with the converse expected to present in December, January, and February. The analysis of weather patterns also supports the previous results, where greater frequency of bike rides were shown to be associated with positive or increasing values for temperatures and greater visibility as opposed to lower frequency with greater wind-speeds and precipitation values. However, due to the limitations of missing data which necessitated missing-value imputation for the weather and trip-information, further analysis to determine the impact of weather patterns on bicycle utilization could be helpful to inform maintenance decisions.
+
+
+
+

@@ -17,6 +17,8 @@ library(Hmisc)
 library(plyr)
 library(dplyr)
 library(lubridate)
+library(ggplot2)
+library(corrplot)
 ```
 
 **Introduction**  
@@ -600,7 +602,128 @@ bike_utl2
 Table 7: Total bike utilization per month. Average utilization was calculated by dividing total duration of trips per month in seconds divided by total time in month in seconds.
 
 
-```{r , include=FALSE}
+```{r weather_pre_process, include=FALSE}
+#Weather and Trip Correlation Plot
+
+#formating trip start date as.POSIXct format
+trip_clean2$start_date <- as.POSIXct(trip_clean2$start_date, format="%m/%d/%y")
+
+################################################################
+#Correlation Plot Analysis
+################################################################
+#Joining station to trip dataset to obtain details on city, will be used afterwards as a UID
+#Merged df assigned to station_trip object
+station_trip <- left_join(trip_clean2,station_df, by=c("start_station_name" = "name"))
+#removing irrelevant variables from dataframe 
+station_trip <- station_trip %>% select(-c(id.x, bike_id, start_station_id, 
+                                       end_station_id, subscription_type, zip_code,id.y,installation_date,
+                                       start_station_name,end_station_name, dock_count, long, lat, end_date, duration))
+
+#creating dataframe grouped by number of trips per day per city, as weather-variables were provided per day
+trip_data_count <- station_trip %>% group_by(start_date, city) %>% count() 
+#joining the trip and weather data 
+trip_weather_corr <- left_join(trip_data_count,weather_df_2, by=c("start_date" = "date", "city"))
 
 ```
 
+*Weather and Bike Rental Patterns*
+To determine the impact of weather patterns on bike-rental patterns, the cleaned and filtered data from the previous steps were retrieved. A dataframe with both the trip-data and station-data was then made, using the left_join function. This was performed in order to obtain information regarding the city of each station, which were necessary details since the weather-dataset contained weather patterns based on each city and zipcode, but not according to station-names. After creating this merged dataframe, the variables of id (id.x corresponding to the ID from the trip-dataset), bike-ids, station and end-station ids, subscription-type and zipcodes which were originally from the trip-dataframe were removed and the variables of id (id.y corresponding to the ID from the station-data), installation-date, start-station name, end-station-name, dock-count, long and lat columns were also removed. These variables were removed as they were irrelevant to the analysis of bike-rental frequency and weather-patterns. In order to then obtain the bike-rental frequency, the data was grouped by start-date and city to obtain the total number of counts of bikes used per day per city, as opposed to variables such as duration. It was important to stratify the data by city as well as date, as the weather-data was divided by city, not only date. Therefore, the next step involved joining this newly created dataframe containing the start-date, city, and number of trips per day information with the weather-dataframe. The unique-identifiers in this case were the variables of start-date/date and city. In order to perform correlation analysis with just the numerical variables, all character or factor variables such as start_date, events, and city character-variables were moved. Then, correlation analysis was performed for each of the cities. The events-variable was removed as it was a factor/character-value, and therefore was not included in the quantitative-correlation analysis. For the following correlation plots, freq refers to the number of trips completed per day. 
+
+For San Francisco as can be seen in Figure 6, a positive but weak correlation can be observed for the variables of max-temperature-f and mean-temperature, and a negative moderate correlation for precipitation inches, as well as a weaker negative correlation for maximum and minimum wing speed, and cloud-cover. 
+
+```{r san_fran, echo=FALSE}
+#Correlation for San Francisco
+#creating dataframe for San Francisco city  
+san_fran <- as.data.frame(trip_weather_corr %>% filter(city == "San Francisco"))
+san_fran <- san_fran %>%
+  #removing character-variables
+  select(-c(start_date, city, zip_code, events)) %>%
+  #coding cloud cover as numeric 
+  mutate(cloud_cover = as.numeric(cloud_cover)) %>%
+  #removing any remaining NA
+  filter(!is.na(max_visibility_miles)) %>%
+  #removing any remaining NA
+  filter(!is.na(max_gust_speed_mph))
+#displaying correlation values 
+corrplot(cor(san_fran))
+```
+Figure 6: Correlation Plot for San Francisco. 
+
+For the city of Mountain View as can be seen in Figure 7, a positive but weak correlation can be seen for the variables of max-temperature-f and mean-temperature and weak negative correlations for the variables of max/mean wind speed, and gust speed. The variables of cloud-cover and precipitation inches demonstrate a marginally better, borderline moderate negative correlation. 
+```{r mountain_view, echo=FALSE}
+#mountain view city 
+mountain_view <- as.data.frame(trip_weather_corr %>% filter(city == "Mountain View"))
+mountain_view <- mountain_view %>%
+  #removing character-variables
+  select(-c(start_date, city, zip_code, events)) %>%
+  #coding cloud cover as numeric 
+  mutate(cloud_cover = as.numeric(cloud_cover)) %>%
+  #removing any remaining NA
+  filter(!is.na(max_visibility_miles)) %>%
+  #removing any remaining NA
+  filter(!is.na(max_gust_speed_mph))
+#displaying correlation values 
+corrplot(cor(mountain_view))
+```
+Figure 7: Correlation Plot for Mountain View.  
+
+The city of Palo Alto similarly showed a weak positive correlation for max and mean temperature, as well as for minimum visibility in miles, and a weak negative correlation for minimum visibility and precipitation inches, as well as for events-types and gust-speed. However, a moderate negative correlation for maximum and average wind speed, as well as cloud cover. Interestingly, there were not any variables that were insufficient for correlation analysis, seen by the lack of ‘?’ compared to the other plots for the other cities as seen in Figure 8. 
+```{r palo_alto, echo=FALSE}
+#palo alto city 
+palo_alto_view <- as.data.frame(trip_weather_corr %>% filter(city == "Palo Alto"))
+palo_alto_view <- palo_alto_view %>%
+  #removing character-variables
+  select(-c(start_date, city, zip_code, events)) %>%
+  #coding cloud cover as numeric 
+  mutate(cloud_cover = as.numeric(cloud_cover)) %>%
+  #removing any remaining NA
+  filter(!is.na(max_visibility_miles)) %>%
+  #removing any remaining NA
+  filter(!is.na(max_gust_speed_mph))
+#displaying correlation values 
+corrplot(cor(palo_alto_view))
+```
+Figure 8: Correlation Plot for Palo Alto  
+
+As seen in Figure 9, which displays the correlation plot for Redwood City, there is only weak positive correlation shown for all variables, with the exception of average wind speed, which shows a borderline-moderate correlation. 
+```{r redwood, echo=FALSE}
+#Redwood City
+redwood_city <- as.data.frame(trip_weather_corr %>% filter(city == "Redwood City"))
+redwood_city <- redwood_city %>%
+  #removing character-variables
+  select(-c(start_date, city, zip_code, events)) %>%
+  #coding cloud cover as numeric 
+  mutate(cloud_cover = as.numeric(cloud_cover)) %>%
+  #removing any remaining NA
+  filter(!is.na(max_visibility_miles)) %>%
+  #removing any remaining NA
+  filter(!is.na(max_gust_speed_mph))
+#displaying correlation values 
+corrplot(cor(redwood_city))
+```
+Figure 9: Correlation Plot for Redwood City   
+
+For the town of San Jose as shown in Figure 10, there are weak positive correlations shown for the mean and minimum visibility variables, with borderline moderate correlation for the max/mean/min temperature variables. Moreover, a weak negative correlation for max/mean wind speeds and gust-speeds with cloud cover, and for precipitation inches is also seen. 
+
+```{r san_jose, echo=FALSE}
+#San Jose City
+sanjose_city <- as.data.frame(trip_weather_corr %>% filter(city == "San Jose"))
+sanjose_city <- sanjose_city %>%
+  #removing character-variables
+  select(-c(start_date, city, zip_code, events)) %>%
+  #coding cloud cover as numeric 
+  mutate(cloud_cover = as.numeric(cloud_cover)) %>%
+  #removing any remaining NA
+  filter(!is.na(max_visibility_miles)) %>%
+  #removing any remaining NA
+  filter(!is.na(max_gust_speed_mph))
+#displaying correlation values 
+corrplot(cor(sanjose_city))
+```
+Figure 11: Correlation Plot for San Jose   
+
+To provide a summary of the weather patterns for all these plots, all the cities demonstrate a weak-positive correlation associated with the max/min/mean temperature variables where increased frequency of bike rides are associated with increased temperature. In addition, this correlation was also shown to be true for the max/minimum/mean visibility (miles) variables, where increased visibility is associated with increased frequency of bike rides. On the other hand, weak-negative correlations are demonstrated with the speed variables, where increasing speed is associated with lower frequency of bike rides. In addition to this, weak-negative correlations were exhibited for precipitation, where increased precipitation is associated with lower frequency of bike rides. Similar to this variable, greater-cloud-cover values being associated with lower frequency of bike rides. These trends were however not noticed in Redwood City, where increased frequency of bike rides were associated not only with greater temperatures but also, negative weather events such as greater wind-speed and greater precipitation or cloud-cover. 
+
+
+*Conclusion *
+The analysis concluded that the common rush hours during weekdays were 8:00 - 8:59 am, 9:00 - 9:59 am and 5:00 - 5:59pm. These results were consistent for both starting and ending stations and likely align with workday patterns of the average worker in the Bay Area. Overall, the bike starting and ending stations on weekdays aligned well. There were discrepancies in the most popular stations for weekends in comparison to weekdays. Specifically, the Market at 4th, Embarcadero at Bryant, and Grant Avenue at Columbus Avenue stations seemed to be busier on the weekends in comparison to weekdays. Interestingly, San Francisco Caltrain (Townsend at 4th) and 2nd at Townsend stations-maintained popularity throughout each analysis. In addition, an increase in utilization of bikes is seen in the months of July – October. Conversely, a decrease in utilization was seen in December, January, and February.  When it comes to the expected weather patterns, weather events thought to be associated with the months of July – October include increased temperatures and greater visibility, along with lower wind-speeds and lower precipitation with the converse expected to present in December, January, and February. The analysis of weather patterns also supports the previous results, where greater frequency of bike rides were shown to be associated with positive or increasing values for temperatures and greater visibility as opposed to lower frequency with greater wind-speeds and precipitation values. However, due to the limitations of missing data which necessitated missing-value imputation for the weather and trip-information, further analysis to determine the impact of weather patterns on bicycle utilization could be helpful to inform maintenance decisions. 

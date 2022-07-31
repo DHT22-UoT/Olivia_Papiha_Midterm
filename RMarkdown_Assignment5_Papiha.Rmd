@@ -375,3 +375,40 @@ saveRDS(weather_df_2, "weather_no_outliers.rds")
 ```
 
 The previous exploratory analyses were helpful in uncovering the variables that necessitated outlier-removal in order to ensure high accuracy of future results. Firstly, we initially removed all the available data were date-information was not available for reasons explained previously.  The method of removing outliers was consistent for many of the same variables from the trip-dataset, with some exceptions, where outliers were identified using the equation 1.5xIQR + Q3 for identifying the upper limits and 1.5xIQR - Q1 for identifying the lower limits. To start, the IQR quantile and IQR functions were applied on the variable of max_visibility_miles, but since identical values for both the upper limit and lower limit were retrieved, therefore instead, another method of outlier recoding was used. This method that was used was the percentile-method, where data values were recoded to the lower and upper limits if observation values were beyond the 2.5%  or 97.5% percentile respectively. This alternative approach allowed for the successful recoding of `r sum(weather_df_2$max_visibility_miles < as.numeric(lower_lim_max_visibility_miles), na.rm=T)` lower-limit outliers and `r sum(weather_df_2$max_visibility_miles > as.numeric(upper_lim_max_visibility_miles), na.rm=T)` for upper limit of max_visibility_miles. Similarly for the mean_visibility_miles variable, identical values for the upper limit and lower limit were retrieved, and the percentile method of outlier removal was performed. This allowed for the recoding of `r sum(weather_df_2$mean_visibility_miles < as.numeric(lower_lim_mean_visibility_miles), na.rm=T)` lower-limit values and `r sum(weather_df_2$mean_visibility_miles > as.numeric(upper_lim_mean_visibility_miles), na.rm=T)` higher-limit values. The determination of disparate values for the upper and lower limit for the variable of max_wind_Speed_mph was also successful, allowing for those outlier-values to be recoded from the dataset based on the IQR method. There were `r sum(weather_df_2$max_wind_Speed_mph < as.numeric(lower_lim_max_wind_Speed_mph), na.rm=T)` lower-limit outliers recoded and `r sum(weather_df_2$max_wind_Speed_mph > as.numeric(upper_lim_max_wind_Speed_mph), na.rm=T)` higher-limit outliers recoded. The IQR method of outlier removal was also successful for the max_gust_speed_mph variable allowing for the recoding of `r sum(weather_df_2$max_gust_speed_mph < as.numeric(lower_max_gust_speed_mph), na.rm=T)` lower-limit but `r sum(weather_df_2$max_gust_speed_mph > as.numeric(upper_max_gust_speed_mph), na.rm=T)` higher limit outliers. Finally, the method of outlier removal based on percentiles was used for the variable of precipitation_inches, allowing for `r  sum(weather_df_2$precipitation_inches < as.numeric(lower_precipitation), na.rm=T)` lower-limit but `r sum(weather_df_2$precipitation_inches > as.numeric(upper_precipitation), na.rm=T)` higher-limit outliers to be recoded.
+
+
+
+*Outliers for Station*
+
+```{r station_outliers, include=FALSE}
+#Station Outlier Removal and the Identification of Stations not in Trip Data 
+
+#Importing libraries
+library(tidyverse)
+library(dplyr)
+
+#reading in station file 
+station_df <- read.csv("station.csv")
+
+#structure of file 
+str(station_df)
+
+#summary of file 
+summary(station_df)
+
+#determining number of unique station-names from station-file 
+nrow(unique(station_df))
+
+#reading in trip file
+trip_file <- read.csv("trip.csv")
+#determining number of unique station-names from trip-file
+length(unique(trip_file$end_station_name))
+
+#determining which stations have not been coded in station_file with anti_join function
+#the trip_file was used as the left-file because it has greater values 
+unique_stations_end <- anti_join(trip_file,station_df, by=c("end_station_name" = "name"))
+#the stations not encoded in station_file were retrieved with unique function
+unique(unique_stations_end$end_station_name)
+```
+
+Alongside the weather and data-files, the station file was also examined. With the structure function, the station file was found to provide many insights. To note, the id-variables were correctly coded as numeric and station name and city variables were correctly coded in character form. Additionally, the latitude and longitude variables were also correctly coded as numeric alongside the dock-count variable. However, the installation-dates were coded as characters. In order to identify any outliers in association to the main trip-file, the number of unique rows was determined, which was retrieved to be `r nrow(unique(station_df))`. After this, the number of unique stations was determined within the trip-file was determined by using the end-station-name, although this could have been replaced with start-station-name. This resulted in the total output of `r length(unique(trip_file$end_station_name))` unique values. This value’s discrepancy with the value from the station file suggested that there were 4 additional values that had been improperly coded in the trip-data file. In order to determine which station-names had been improperly coded in the trip-data, an anti-join function was applied with the trip-data and the station-file data to determine which station-names did not match with the station-data. This function found that the `r unique(unique_stations_end$end_station_name)` values had not been provided in the station-data and must have been therefore, been improperly coded in the trip-file data.       

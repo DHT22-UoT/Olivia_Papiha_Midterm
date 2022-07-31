@@ -4,13 +4,14 @@ title: "Bay Area Bike Rental Operation Research - Analysis of Bicycle Trip and W
 author: "Papiha Joharapurkar (Group 5)"
 date: "2022-07-13"
 output:
-  html_document 
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
 	echo = TRUE,
-	fig.path = "images/",
+	fig.path = "images",
 	warning = FALSE
 )
 knitr::include_graphics('images')
@@ -134,7 +135,7 @@ saveRDS(trip_clean2, "trip_clean2.rds")
 
 This finding prompted a deeper analysis of the start and end station names to search for duplicates or misspelled station names. Using the function "unique" two misspelled station names were identified at first glance: "Washington at Kearny" and "Post at Kearny" with the correct spelling being "Kearney". To fix this issue, the incorrectly spelled stations names were recoded with the correct spelling. Upon a closer examination of the data set, it was observed that "San Jose Government Center" and "Santa Clara County Civic Center" are both coded under station ID 25. In addition, "Broadway at Main" and "Stanford in Redwood City" were both coded under station ID 80. As "Broadway at Main" and "San Jose Government Center" stations are not included in the "station.csv" data set, they were recoded to "Stanford in Redwood City" and "Santa Clara County Civic Center" by their respective corresponding station IDs as it was assumed the names were entered incorrectly by error. The "status" function was then used again to confirm there were now `r length(unique(trip_clean2$start_station_id))` unique stations IDs and `r length(unique(trip_clean2$start_station_name))` unique station (starting and ending) names.
 
-*Analyzing categorical variables*
+*Analyzing categorical variables*  
 Analysis of categorical variables using the "freq" function from the "funModelling" R package examined the frequency in which starting and ending stations were seen in trip indicated the top 10 most frequent start stations in data to be: `r head(freq(trip_clean2$start_station_name), 10)$var` (Table 1). The top 10 ending stations were similar: `r tail(freq(trip_clean2$start_station_name), 10)$var` (Table 2).
 
 ```{r table_setup, include=FALSE}
@@ -142,7 +143,8 @@ output <- freq(trip_clean2$start_station_name)
 ```
 
 ```{r table_1, echo=FALSE}
-output %>% head(10) %>% dplyr::rename(Station = var)
+output <- output %>% head(10) %>% dplyr::rename(Station = var)
+knitr::kable(output)
 ```
 
 Table 1: Ten most frequent starting stations overall. Number of total rides left from each station with the percent of total ride left from each station.
@@ -152,7 +154,8 @@ output_2 <- freq(trip_clean2$end_station_name)
 ```
 
 ```{r table_2, echo=FALSE}
-output_2 %>% head(10) %>% dplyr::rename(Station = var)
+output_2 <- output_2 %>% head(10) %>% dplyr::rename(Station = var)
+knitr::kable(output_2)
 ```
 
 Table 2: Ten most frequent ending stations overall. Number of total rides arrived at each station with the percent of total ride arrived at each station.
@@ -240,7 +243,7 @@ str(weather_df_1)
 To initiate our exploration of the weather.csv file, the "glimpse" function from the dplyr package was used to obtain an overview of all the variables from the weather dataset. In this primary step, the following details were noted:\
 The date column was formatted in character-form instead of as date form, which necessitated a modification to the latter form. In addition, the max_temperature_f, mean_temperature_f and min_temperature_f variables, along with the max_visibility_miles, mean_visibility_miles, min_visibility_miles variables, and the max_wind_Speed_mph, mean_wind_speed_mph, max_gust_speed_mph variables were provided in integer form. These would need to be coded to numeric form for future analyses, such as correlation plots. Moreover, the precipitation (inches) was incorrectly coded as characters instead of integers, due to the fact that there were a few values coded as "T". This value encodes "trace" for trace-amounts of precipitation, and would need to be changed to 0. The cloud-cover variable seems to be coded as an integer but could be coded as a factor as there are different categories of cloud-cover. In addition, the events variable seem to be properly coded as characters, however the output also indicated that there are some variables coded as " " which would need to be changed to NA. The zipcode variable is also correctly coded as an integer, but should be coded as a factor. Based on this initial examination, the variables were recoded and reformatted before performing any of the future steps of the EDA.
 
-*Analyzing categorical variables*\
+*Analyzing categorical variables*  
 The next approach to the exploratory analysis involved performing an assessment of the categorical data through the "freq" function. There were only a few categorical variables assessed, these encompassed the cloud_cover, events, zip_code and city variables and the most relevant plots are shown here. The output revealed that there were 9 levels of the cloud_cover variable, ranging in frequency with 0-cloud cover being the most frequent and 8-cloud_cover category as being the least frequent as shown in Figure 3A. In addition, the events variable indicated that 80.71% (representing 1473 data values) of the data was composed of NA-values, with the next most frequent events composing of rain and fog. Lastly, there were 5 levels associated with the cities, related to the 5 levels of zipcodes, which are evenly distributed in frequency, as shown by Figure 3B.
 
 ```{r weather_categorical, include=FALSE}
@@ -253,7 +256,7 @@ output_weather <- freq(weather_df_1)
 
 Figure 3: Assessment of Categorical Variables. A) Frequency of Weather Events (Left) B) Frequency of Dates for Each City (Right)
 
-*Analyzing numerical variables*\
+*Analyzing numerical variables*  
 After assessing the categorical variables, the variables remaining were numerical in form, and were thus explored through the plot_num function. For this function, barplots were provided for all the numerical variables, which helped us develop initial insights into each of variables as can be seen in Figure 4. The minimum-visibility (miles), maximum-gust-speed (mph) variables, along with max_gust_speed_mph and precipitation_inches variables show relatively skewed and unbalanced distributions which can be attributed to the presence of outliers that would need to be removed, supporting previous analyses. The remaining numerical variables seem to have a relatively normal distribution, without any discerning outliers.
 
 ```{r figure_4, echo=FALSE}
@@ -502,7 +505,8 @@ rush_hours2_tb <- rush_hours2_tb[order(rush_hours2_tb,decreasing = TRUE)]
 In order to determine the 10 most frequent starting stations on weekdays, the same steps were followed as to establish the rush hours for ending stations. The data frame was then grouped by starting station name and then only trips leaving at hours between 8:00 - 8:59 am, 9:00 - 9:59 am and 5:00 - 5:59 pm were included in the analysis. The starting stations and their corresponding frequencies were then put in table format and ordered from most to least frequent in terms of number of trips left during the previously specified hours. The top 10 starting stations at rush hours were: `r as.data.frame(rush_hours2_tb[1:10])$Var1` (Table 3).
 
 ```{r table_3, echo=FALSE}
-as.data.frame(rush_hours2_tb[1:10]) %>% dplyr::rename(Station = Var1)
+rush_hours2_tb <- as.data.frame(rush_hours2_tb[1:10]) %>% dplyr::rename(Station = Var1)
+knitr::kable(rush_hours2_tb)
 ```
 
 Table 3: Ten most frequent starting stations on weekdays. Frequency of rides represents the numbers of trips left at each starting station during rush hours on weekdays.
@@ -533,7 +537,8 @@ rush_hours3_tb <- rush_hours3_tb[order(rush_hours3_tb,decreasing = TRUE)]
 To determine the 10 most frequent ending stations during rush hours on weekdays the same process to determine rush hours for starting stations was followed. This analysis returned the same rush hours at the ending stations as the starting stations being: 8:00 - 8:59 am, 9:00 - 9:59 am and 5:00 - 5:59 pm. The new data frame for frequencies of ending stations during weekdays was then filtered to only include rush hours and then made into a table, using the "table" function and ordered from most to least frequent. In order, the top 10 most frequent ending stations during rush hours on weekdays were: `r as.data.frame(rush_hours3_tb[1:10])$Var1` (Table 4).
 
 ```{r table_4, echo=FALSE}
-as.data.frame(rush_hours3_tb[1:10]) %>% dplyr::rename(Station = Var1)
+rush_hours3_tb <- as.data.frame(rush_hours3_tb[1:10]) %>% dplyr::rename(Station = Var1)
+knitr::kable(rush_hours3_tb)
 ```
 
 Table 4: Ten most frequent ending stations on weekdays. Frequency of rides represents the numbers of trips arriving at each ending station during rush hours on weekdays.
@@ -563,7 +568,8 @@ rush_hours_wkend_tb <- rush_hours_wkend_tb[order(rush_hours_wkend_tb,decreasing 
 The process for determining the most frequent stations on weekends was largely like the previous analysis except data was filtered to remove weekdays instead of weekends. A new data frame called "rush_hours_wkend" was created, and using the "tidyverse" package, weekdays, which are assigned values of 1 (Monday) to 6 (Friday) were filtered out. The 10 most frequent starting stations on weekends were: `r as.data.frame(rush_hours_wkend_tb)$Var1[1:10]` (Table 5).
 
 ```{r table_5, echo=FALSE}
-as.data.frame(rush_hours_wkend_tb)[1:10,] %>% dplyr::rename(Station = Var1)
+rush_hours_wkend_tb <- as.data.frame(rush_hours_wkend_tb)[1:10,] %>% dplyr::rename(Station = Var1)
+knitr::kable(rush_hours_wkend_tb)
 ``` 
 
 Table 5: Ten most frequent starting stations on weekend. Frequency of rides represents the numbers of trips beginning at each starting station during weekends.
@@ -585,7 +591,8 @@ rush_hours_wkend2_tb <- rush_hours_wkend2_tb[order(rush_hours_wkend2_tb,decreasi
 The analysis of the most frequent end stations during weekends was done in the same way as the previous analysis, however, with the replacement of starting station to ending stations data from "trip_clean2" data set. Moreover, the results indicated a large portion of most frequent stations to be very similar to the starting station analysis, however, with slightly different ordering: `r as.data.frame(rush_hours_wkend2_tb)$Var1[1:10]` (Table 6).
 
 ```{r table_6, echo=FALSE}
-as.data.frame(rush_hours_wkend2_tb)[1:10,] %>% dplyr::rename(Station = Var1)
+rush_hours_wkend2_tb <- as.data.frame(rush_hours_wkend2_tb)[1:10,] %>% dplyr::rename(Station = Var1)
+knitr::kable(rush_hours_wkend2_tb, digits=2)
 ```
 
 Table 6: Ten most frequent ending stations on weekend. Frequency of rides represents the numbers of trips finishing at each end station during on weekends.
@@ -618,7 +625,7 @@ bike_utl2 <- bike_utl2 %>%
 In order to calculate the average utilization of bikes overall per month, a new data frame called "bike_utl" from the "trip_clean2" data frame was created. Data was first grouped by month and then an additional data frame was created and using the "aggregate" function to sum the total trip durations corresponding to each month. An additional column for the number of days in each month was added as well and a column representing the total seconds in each month which multiplies the days in the month by the average seconds in a day (86400 seconds). The total bike utilization per month was calculated by adding a column that performs a division of total seconds used per month by the total seconds in the given month. Utilization results for each month can be seen in Table 7.
 
 ```{r table_7, echo=FALSE}
-bike_utl2
+knitr::kable(bike_utl2)
 ```
 
 Table 7: Total bike utilization per month. Average utilization was calculated by dividing total duration of trips per month in seconds divided by total time in month in seconds.

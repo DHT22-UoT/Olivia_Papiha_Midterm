@@ -16,6 +16,7 @@ library(tidyverse)
 library(Hmisc)
 library(plyr)
 library(dplyr)
+library(lubridate)
 ```
 
 **Introduction**  
@@ -245,7 +246,7 @@ Figure 4: Assessment of Numerical Variables. The minimum-visibility (miles), max
 
 After plotting the numerical variables, the profiling-num function was performed to obtain an understanding of each variable’s distribution and range. This function demonstrated that there is a high standard deviation for the max_temperature_f, mean_temperature_f, min_temperature_f, max_wind_Speed_mph and max_gust_speed_mph variables. In addition, the variation coefficient demonstrated that the precipitation_inches variable is associated with more variance as opposed to the remaining variables that are centered around the mean, inferring less accuracy associated with this variable if it were to be chosen as a possible predictor. The skewness metric informs on the measure of asymmetry, and this function demonstrated that the variables of max_visibility_miles, mean_visibility_miles, max_wind_Speed_mph, max_gust_speed_mph and precipitation_inches variables have greater skewness-values and therefore greater likelihood of observing outliers in these variables. The kurtosis variable describes the distribution for the tails, where higher number indicates presence of outliers, and this was demonstrated by the higher values shown for the max_visibility_miles, mean_visibility_miles, max_wind_Speed_mph, max_gust_speed_mph and precipitation_inches variables. There was also a high IQR range for the max_temperature_f, mean_temperature_f, and min_temperature_f variables obtained. 
 
-```{r describe, echo=FALSE}
+```{r describe, include=FALSE}
 #full univariate analysis being performed 
 funModeling::profiling_num(weather_df_1)
 
@@ -412,3 +413,195 @@ unique(unique_stations_end$end_station_name)
 ```
 
 Alongside the weather and data-files, the station file was also examined. With the structure function, the station file was found to provide many insights. To note, the id-variables were correctly coded as numeric and station name and city variables were correctly coded in character form. Additionally, the latitude and longitude variables were also correctly coded as numeric alongside the dock-count variable. However, the installation-dates were coded as characters. In order to identify any outliers in association to the main trip-file, the number of unique rows was determined, which was retrieved to be `r nrow(unique(station_df))`. After this, the number of unique stations was determined within the trip-file was determined by using the end-station-name, although this could have been replaced with start-station-name. This resulted in the total output of `r length(unique(trip_file$end_station_name))` unique values. This value’s discrepancy with the value from the station file suggested that there were 4 additional values that had been improperly coded in the trip-data file. In order to determine which station-names had been improperly coded in the trip-data, an anti-join function was applied with the trip-data and the station-file data to determine which station-names did not match with the station-data. This function found that the `r unique(unique_stations_end$end_station_name)` values had not been provided in the station-data and must have been therefore, been improperly coded in the trip-file data.       
+*Rush-Hours and 10-Most Frequent Starting/Ending Stations*
+Establishing the Highest Volume Hours on Weekdays
+
+```{r rush_hours, include=FALSE}
+### Script 2 - just trip ####
+
+trip_clean2<- readRDS("trip_clean2.rds")
+
+# Establish the highest volume hours on weekdays. Use to build 'rush hours' into their model (lubridate package).
+# Have to find the hours of weekdays where the trip volume is highest (eg. can try histograms). Just trip.
+
+# Convert format of start_date and end_date
+
+# So date will be recognized as a date
+# Attempted to mutate data and input format as "%d/%m/%y %H:%M" but dates are returning NA
+###Previous code showed error for date-format, modified code to eliminate error here:
+
+trip_clean2 %>% mutate(start_date = as.POSIXct(start_date, format="%m/%d/%y")) %>% mutate(end_date = as.POSIXct(end_date, format="%m/%d/%y"))
+
+rush_hours <- trip_clean2 %>%
+  mutate(start_date_for = mdy_hm(start_date)) %>%
+  # Removes Sun (1) and Sat (7) from data
+  filter(wday(start_date_for) >= 2 & wday(start_date_for) <= 6) %>%
+  mutate(hrs = hour(mdy_hm(start_date))) %>%
+  group_by(hrs)
+ 
+```
+
+The modified “trip_clean2.rds” was imported and will be the main analysis on the trip data set moving forward. In order to establish highest volume hours on weekdays, the start and end trip dates first had to be recognizable as dates. Using the “as.POSIXct” function the dates were converted from characters to dates. A new data frame called “rush_hours” was created, and using the “tidyverse” package, weekends, which were assigned value of 1 (for Sunday) and 7 (for Saturday) using the “wday” function, were filtered out from the starting dates in the data frame. A new column of hours, corresponding to the time in the starting dates column was created and data was grouped by starting hour. Through closer investigation by the “table” function and by using a histogram to model the data, the hours of 8:00 - 8:59am, 5:00 - 5:59pm, and 9:00 - 9:59am were the most popular times to start trips on weekdays (Figure 5). Starting times were chosen to represent rush hours as this would be the times that customers were picking up bikes and would therefore be the times when the shop is most busy with customers.
+
+```{r figure_5, echo=FALSE}
+# Est highest vol hours for each weekday with histogram
+hist(rush_hours$hrs, main = "Histogram of Rush Hours During Weekdays", xlab = "Hour of Day", xlim = c(0,24))
+
+```
+Figure 5: Histogram representing the most frequent times to start trips. Hours of 8:00 - 8:59 am, 5:00 - 5:59pm, and 9:00 - 9:59 am are the most frequent times for riders to start their trip on weekdays.
+
+Rush hours of 8:00 - 8:59 am, 5:00 - 5:59pm, and 9:00 - 9:59 am on weekdays are expected values as they closely align with the workday patterns of the average 9:00am to 5:00pm worker. In addition, the least common times to start a trip are between the hours of 1:00am - 4:00 am, which are hours when most people tend to be asleep. 
+
+```{r chunk, include=FALSE}
+
+# And using a table
+table(rush_hours$hrs)
+
+# Determine the 10 most frequent starting stations and ending stations during the ‘rush hours’.
+
+# Most frequent starting stations during rush hours on weekdays
+rush_hours2 <- trip_clean2 %>%
+  mutate(start_date_for = mdy_hm(start_date)) %>%
+  # Removes Sun (1) and Sat (7) from data
+  filter(wday(start_date_for) >= 2 & wday(start_date_for) <= 6) %>%
+  mutate(hrs = hour(mdy_hm(start_date))) %>%
+  group_by(hrs) %>%
+  filter(hrs == 8| hrs == 17 | hrs == 9) %>%
+  group_by(start_station_name)
+
+rush_hours2_tb <- table(rush_hours2$start_station_name)
+
+#Modified rush-hours table so that it is ordered based on descending-order
+rush_hours2_tb <- rush_hours2_tb[order(rush_hours2_tb,decreasing = TRUE)]
+
+```
+
+*Determining the 10 Most Frequent Starting and Ending Stations on Weekdays*
+In order to determine the 10 most frequent starting stations on weekdays, the same steps were followed as to establish the rush hours for ending stations. The data frame was then grouped by starting station name and then only trips leaving at hours between 8:00 - 8:59 am, 9:00 - 9:59 am and 5:00 - 5:59 pm were included in the analysis. The starting stations and their corresponding frequencies were then put in table format and ordered from most to least frequent in terms of number of trips left during the previously specified hours. The top 10 starting stations at rush hours were:  `r as.data.frame(rush_hours2_tb[1:10])$Var1` (Table 3).
+
+```{r table_3, include=FALSE}
+as.data.frame(rush_hours2_tb[1:10])
+```
+Table 3: Ten most frequent starting stations on weekdays. Frequency of rides represents the numbers of trips left at each starting station during rush hours on weekdays. 
+
+
+```{r ending_hours, include=FALSE}
+
+# Most frequent ending stations during rush hours on weekdays
+# Determine rush hours for ending stations
+rush_hours3 <- trip_clean2 %>%
+  mutate(end_date_for = mdy_hm(end_date)) %>%
+  # Removes Sun (1) and Sat (7) from data
+  filter(wday(end_date_for) >= 2 & wday(end_date_for) <= 6) %>%
+  mutate(hrs = hour(mdy_hm(end_date))) %>%
+  group_by(hrs) %>% 
+  group_by(end_station_name)
+
+table(rush_hours3$hrs)
+
+rush_hours3 %>%
+  # Filtering for identified rush hours
+  filter(hrs == 8| hrs == 17 | hrs == 9)
+  
+rush_hours3_tb <- table(rush_hours3$end_station_name)
+
+rush_hours3_tb <- rush_hours3_tb[order(rush_hours3_tb,decreasing = TRUE)]
+```
+To determine the 10 most frequent ending stations during rush hours on weekdays the same process to determine rush hours for starting stations was followed. This analysis returned the same rush hours at the ending stations as the starting stations being: 8:00 - 8:59 am, 9:00 - 9:59 am and 5:00 - 5:59 pm. The new data frame for frequencies of ending stations during weekdays was then filtered to only include rush hours and then made into a table, using the “table” function and ordered from most to least frequent. In order, the top 10 most frequent ending stations during rush hours on weekdays were: `r as.data.frame(rush_hours3_tb[1:10])`(Table 4). 
+
+```{r table_4, echo=FALSE}
+as.data.frame(rush_hours3_tb[1:10])
+```
+Table 4: Ten most frequent ending stations on weekdays. Frequency of rides represents the numbers of trips arriving at each ending station during rush hours on weekdays.
+
+Apart from a few discrepancies, the most frequent starting and ending stations on weekdays appeared to mostly align with one another, which is to be expected. Specifically, the ending stations that were not included in the top 10 starting stations were Powell Street BART and Embarcadero at Sansome. Conversely, the two starting stations that were not included in the top 10 ending stations were Beale at Market and Market at 10th (Table 3-4).
+
+*Determining the 10 Most Frequent Starting and Ending Stations on Weekends*
+
+```{r freq_weekend_stations, include=FALSE}
+#### Determine the 10 most frequent starting stations and ending stations during weekends. ####
+
+# Most frequent starting stations on weekends
+rush_hours_wkend <- trip_clean2 %>%
+  mutate(start_date_for = mdy_hm(start_date)) %>%
+  # Removes everyday except for Sun (1) and Sat (7) from data
+  filter(wday(start_date_for) == 1 | wday(start_date_for) == 7) %>%
+  mutate(hrs = hour(mdy_hm(start_date))) %>%
+  # Group by hours
+  group_by(hrs) %>%
+  # Group by start stations
+  group_by(start_station_name)
+
+rush_hours_wkend_tb <- table(rush_hours_wkend$start_station_name)
+rush_hours_wkend_tb <- rush_hours_wkend_tb[order(rush_hours_wkend_tb,decreasing = TRUE)]
+
+```
+The process for determining the most frequent stations on weekends was largely like the previous analysis except data was filtered to remove weekdays instead of weekends. A new data frame called “rush_hours_wkend” was created, and using the “tidyverse” package, weekdays, which are assigned values of 1 (Monday) to 6 (Friday) were filtered out. The 10 most frequent starting stations on weekends were: `r as.data.frame(rush_hours_wkend_tb)`(Table 5). 
+
+
+
+```{r table_5, echo=FALSE}
+as.data.frame(rush_hours_wkend_tb)
+```
+Table 5: Ten most frequent starting stations on weekend. Frequency of rides represents the numbers of trips beginning at each starting station during weekends.
+
+
+```{r freq_end_stations, include=FALSE}
+# Most frequent ending stations on weekends
+rush_hours_wkend2 <- trip_clean2 %>%
+  mutate(end_date_for = mdy_hm(end_date)) %>%
+  # Removes everyday except for Sun (1) and Sat (7) from data
+  filter(wday(end_date_for) == 1 | wday(end_date_for) == 7) %>%
+  mutate(hrs = hour(mdy_hm(end_date))) %>%
+  group_by(hrs) %>%
+  group_by(end_station_name)
+
+rush_hours_wkend2_tb <- table(rush_hours_wkend2$end_station_name)
+rush_hours_wkend2_tb <- rush_hours_wkend2_tb[order(rush_hours_wkend2_tb,decreasing = TRUE)]
+```
+
+The analysis of the most frequent end stations during weekends was done in the same way as the previous analysis, however, with the replacement of starting station to ending stations data from “trip_clean2” data set. Moreover, the results indicated a large portion of most frequent stations to be very similar to the starting station analysis, however, with slightly different ordering: `r as.data.frame(rush_hours_wkend2_tb)` (Table 6).
+
+
+```{r table_6, echo=FALSE}
+as.data.frame(rush_hours_wkend2_tb)
+```
+Table 6: Ten most frequent ending stations on weekend. Frequency of rides represents the numbers of trips finishing at each end station during on weekends.
+
+Overall, the most frequent starting/ending stations on weekends and weekdays appeared to closely align with one another. Interestingly, there appears to be a slight discrepancy in stations that are more popular on weekends versus weekdays. For example, some of the top 10 starting stations for weekends included Grant Avenue at Columbus Avenue, Powell at Post (Union Square), Embarcadero at Bryant, Embarcadero at Sansome, and Market at 4th all of which were not included in the top 10 stations starting list on weekdays. For ending stations, top 10 that were not in the ending station analysis for weekends included: Market at 4th, Embarcadero at Bryant, and Grant Avenue at Columbus Avenue. It is worth noting that San Francisco Caltrain (Townsend at 4th) and 2nd at Townsend stations-maintained popularity throughout each analysis.
+
+
+*Average Utilization of Bikes *
+```{r utilization, include=FALSE}
+
+#### Calculate the average utilization of bikes for each month. Total time used/total time in month. ####
+
+# Calculating average utilization of bikes total per month
+
+bike_utl <- trip_clean2 %>%
+  mutate(start_date_for2 = mdy_hm(start_date)) %>%
+  group_by(mon = month(start_date_for2))
+     
+# Summed the duration in seconds of trip starting in each month 
+bike_utl2 <- aggregate(bike_utl$duration, by=list(mon = bike_utl$mon), FUN = sum)
+
+bike_utl2 <- bike_utl2 %>% 
+  # Add column for number of days per month 
+ mutate(no_days_per_month = c(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)) %>%
+  # Add column with calculation seconds per month (86400 sec / day)
+  mutate(sec_per_month = no_days_per_month*86400) %>%
+  mutate(avg_utl_per_mon = x/sec_per_month)
+```
+
+In order to calculate the average utilization of bikes overall per month, a new data frame called “bike_utl”  from the “trip_clean2” data frame was created. Data was first grouped by month and then an additional data frame was created and using the “aggregate” function to sum the total trip durations corresponding to each month. An additional column for the number of days in each month was added as well and a column representing the total seconds in each month which multiplies the days in the month by the average seconds in a day (86400 seconds). The total bike utilization per month was calculated by adding a column that performs a division of total seconds used per month by the total seconds in the given month. Utilization results for each month can be seen in Table 7. 
+
+```{r table_7, echo=FALSE}
+bike_utl2
+```
+Table 7: Total bike utilization per month. Average utilization was calculated by dividing total duration of trips per month in seconds divided by total time in month in seconds.
+
+
+```{r , include=FALSE}
+
+```
+

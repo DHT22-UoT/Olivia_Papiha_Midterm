@@ -4,18 +4,25 @@ title: "Bay Area Bike Rental Operation Research - Analysis of Bicycle Trip and W
 author: "Papiha Joharapurkar (Group 5)"
 date: "2022-07-13"
 output:
-  html_document: default
-  pdf_document: default
-keep_md: yes
+  html_document 
 ---
+
+<!-- # ```{r setup, include=FALSE} -->
+<!-- # knitr::opts_chunk$set( -->
+<!-- # 	echo = TRUE, -->
+<!-- # 	fig.path = "images/", -->
+<!-- # 	warning = FALSE -->
+<!-- # ) -->
+<!-- # knitr::include_graphics('~/Documents/Masters/SpecialTopics/Olivia_Papiha_Midterm/images') -->
+<!-- # ``` -->
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
 	echo = TRUE,
-	fig.path = "images/",
+	# fig.path = "images/",
 	warning = FALSE
 )
-knitr::include_graphics('~/Documents/Masters/SpecialTopics/Olivia_Papiha_Midterm/images')
+# knitr::include_graphics('~/Documents/Masters/SpecialTopics/Olivia_Papiha_Midterm/images')
 ```
 
 ```{r libraries, include=FALSE}
@@ -134,7 +141,6 @@ This finding prompted a deeper analysis of the start and end station names to se
 *Analyzing categorical variables*  
 Analysis of categorical variables using the “freq” function from the “funModelling” R package examined the frequency in which starting and ending stations were seen in trip indicated the top 10 most frequent start stations in data to be: `r head(freq(trip_clean2$start_station_name), 10)$var` (Table 1). The top 10 ending stations were similar: `r tail(freq(trip_clean2$start_station_name), 10)$var` (Table 2).
 
-
 ```{r table_setup, include=FALSE}
 output <- freq(trip_clean2$start_station_name)
 ```
@@ -144,7 +150,6 @@ output %>% head(10)
 ```
 
 Table 1: Ten most frequent starting stations overall. Number of total rides left from each station with the percent of total ride left from each station.
-
 
 ```{r table_setup2, include=FALSE}
 output_2 <- freq(trip_clean2$end_station_name)
@@ -727,7 +732,6 @@ corrplot(cor(sanjose_city))
 Figure 11: Correlation Plot for San Jose    
 
 To provide a summary of the weather patterns for all these plots, all the cities demonstrate a weak-positive correlation associated with the max/min/mean temperature variables where increased frequency of bike rides are associated with increased temperature. In addition, this correlation was also shown to be true for the max/minimum/mean visibility (miles) variables, where increased visibility is associated with increased frequency of bike rides. On the other hand, weak-negative correlations are demonstrated with the speed variables, where increasing speed is associated with lower frequency of bike rides. In addition to this, weak-negative correlations were exhibited for precipitation, where increased precipitation is associated with lower frequency of bike rides. Similar to this variable, greater-cloud-cover values being associated with lower frequency of bike rides. These trends were however not noticed in Redwood City, where increased frequency of bike rides were associated not only with greater temperatures but also, negative weather events such as greater wind-speed and greater precipitation or cloud-cover.  
-
 
 ## Conclusion
 The analysis concluded that the common rush hours during weekdays were 8:00 - 8:59 am, 9:00 - 9:59 am and 5:00 - 5:59pm. These results were consistent for both starting and ending stations and likely align with workday patterns of the average worker in the Bay Area. Overall, the bike starting and ending stations on weekdays aligned well. There were discrepancies in the most popular stations for weekends in comparison to weekdays. Specifically, the Market at 4th, Embarcadero at Bryant, and Grant Avenue at Columbus Avenue stations seemed to be busier on the weekends in comparison to weekdays. Interestingly, San Francisco Caltrain (Townsend at 4th) and 2nd at Townsend stations-maintained popularity throughout each analysis. In addition, an increase in utilization of bikes is seen in the months of July – October. Conversely, a decrease in utilization was seen in December, January, and February.  When it comes to the expected weather patterns, weather events thought to be associated with the months of July – October include increased temperatures and greater visibility, along with lower wind-speeds and lower precipitation with the converse expected to present in December, January, and February. The analysis of weather patterns also supports the previous results, where greater frequency of bike rides were shown to be associated with positive or increasing values for temperatures and greater visibility as opposed to lower frequency with greater wind-speeds and precipitation values. However, due to the limitations of missing data which necessitated missing-value imputation for the weather and trip-information, further analysis to determine the impact of weather patterns on bicycle utilization could be helpful to inform maintenance decisions. 

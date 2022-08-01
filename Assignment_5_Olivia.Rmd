@@ -8,7 +8,8 @@ output:
 
 ## **Exploratory Data Analysis for the Trip Dataset**
 
-```{r setup}
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(include = FALSE)
 # Load packages
 library(funModeling)
 library(tidyverse)
@@ -18,6 +19,7 @@ library(dplyr)
 library(lubridate)
 library(ggplot2)
 library(corrplot)
+library(stats)
 
 # Read trip.csv file into R
 trip_data <- read_csv("trip.csv")
@@ -74,32 +76,31 @@ status(trip_data)
 
 ### *Analyzing categorical variables*
 
-  Analysis of categorical variables using the “freq” function from the “funModelling” R package examined the frequency in which starting and ending stations were seen in trip indicated the top 10 most frequent start stations in data to be:  San Francisco Caltrain (Townsend at 4th), Harry Bridges Plaza (Ferry Building), San Francisco Caltrain 2 (330 Townsend), 2nd at Townsend, Embarcadero at Sansome, Temporary Transbay Terminal (Howard at Beale),  Market at Sansome, Steuart at Market, Townsend at 7th, and Market at 4th **(Figure 1)** The top 10 ending stations were similar: San Francisco Caltrain (Townsend at 4th),  Harry Bridges Plaza (Ferry Building), San Francisco Caltrain 2 (330 Townsend), Market at Sansome, 2nd at Townsend, Embarcadero at Sansome, Townsend at 7th, Steuart at Market,  Temporary Transbay Terminal (Howard at Beale), and Powell Street BART **(Figure 2)**.
 
+#### **Table 1:** *Ten most frequent starting stations overall.* Number of total rides left from each station with the percent of total ride left from each station.
 
-#### **Figure 1:** *Ten most frequent starting stations overall.* Number of total rides left from each station with the percent of total ride left from each station.
-
-```{r start_freq, include=FALSE}
+```{r start_freq, fig.height=7.5, message=FALSE, warning=FALSE, include=FALSE}
 head(freq(trip_data$start_station_name), 10)
 ``` 
+![](images_Olivia_A5/tb1.png)
+ 
+ Analysis of categorical variables using the “freq” function from the “funModelling” R package examined the frequency in which starting and ending stations were seen in trip indicated the top 10 most frequent start stations in data to be:  San Francisco Caltrain (Townsend at 4th), Harry Bridges Plaza (Ferry Building), San Francisco Caltrain 2 (330 Townsend), 2nd at Townsend, Embarcadero at Sansome, Temporary Transbay Terminal (Howard at Beale),  Market at Sansome, Steuart at Market, Townsend at 7th, and Market at 4th **(Table 1)** The top 10 ending stations were similar: San Francisco Caltrain (Townsend at 4th),  Harry Bridges Plaza (Ferry Building), San Francisco Caltrain 2 (330 Townsend), Market at Sansome, 2nd at Townsend, Embarcadero at Sansome, Townsend at 7th, Steuart at Market,  Temporary Transbay Terminal (Howard at Beale), and Powell Street BART **(Table 2)**.
 
-![Top 10 Most Frequent Start Stations](images_Olivia_A5/freq_image_1.png)
+#### **Table 2:** *Ten most frequent ending stations overall.* Number of total rides arrived at each station with the percent of total ride arrived at each station.
 
-#### **Figure 2:** *Ten most frequent ending stations overall.* Number of total rides arrived at each station with the percent of total ride arrived at each station.
-
-```{r end_freq, include=FALSE}
+```{r end_freq, fig.height=7.5, message=FALSE, warning=FALSE, include=FALSE}
 head(freq(trip_data$end_station_name), 10)
 ```
-![Top 10 Most Frequent End Stations](images_Olivia_A5/freq_image_2.png)
+![](images_Olivia_A5/tb2.png)
 
-  In addition, analysis of the subscription type found that 85.11% of rides are by “Subscribers” and 14.89% of rides are by “Customers”, those without a subscription **(Figure 3).** 
 
-#### **Figure 3:** *Subscription types.*
+#### **Figure 1:** *Subscription types.*
 
 ```{r sub_type, include=FALSE}
 freq(trip_data$subscription_type)
 ```
 ![Subscription Types](images_Olivia_A5/sub_freq.png)
+In addition, analysis of the subscription type found that 85.11% of rides are by “Subscribers” and 14.89% of rides are by “Customers”, those without a subscription **(Figure 1).** 
 
 ### *Analyzing numerical variables and addressing outliers*
 
@@ -112,6 +113,8 @@ describe(trip_data$duration)
 ```
 
 Analysis of numerical variables using the “describe” function from the “Hmisc” R package was done to obtain information about the trip durations. The mean value of trip duration was of trips in the dataset was 1131.967 sec, with the five highest durations being 644 771, 715 339, 716 480, 720 454, and 1 727 040 seconds long and the five lowest durations all being approximately 60 seconds or less. Here, trips that were less than 2 minutes (120 seconds long) were removed from the data set using the filter function from the “tidyverse” package; about 2,499 observations were removed from the dataset after completing this step. 
+
+#### **Figure 2:** *Histogram of trip durations in seconds.* Note frequencies at each end of the range are large due to the reassignment of outliers to upper and lower limits.
 
 ```{r outliers_trip, message=FALSE, warning=FALSE, include=FALSE}
 # Find the number of cancelled trips (<2min) and remove from data set 
@@ -159,17 +162,13 @@ describe(trip_clean2)
 saveRDS(trip_clean2, "trip_clean2.rds")
 ```
 
-Outliers were identified using the equation 1.5 x IQR + Q3 for identifying the upper limits and 1.5 x IQR - Q1 for identifying the lower limits. There were approximately 65,195 outliers if the upper and lower limits were to be removed. To prevent loss of a massive number of data points the outliers were identified and reassigned to be the upper and lower limits as opposed to removing them entirely. A histogram of duration trip frequency was created to examine the distribution and to check for any extreme skewedness **(Figure 4)**. Using the “describe” function from the “ Hmisc” package a final check of the data was done to ensure outliers had been addressed. After modifying outliers to be either upper or lower limits, the new mean of trip duration was 598.9 seconds. The modified trip data set was named “trip_clean2” and saved as a RDS file for later use.
+![](images_Olivia_A5/hist_dur.png)
 
-#### **Figure 4:** *Histogram of trip durations in seconds.* Note frequencies at each end of the range are large due to the reassignment of outliers to upper and lower limits.
-
-```{r hist_dur, echo=FALSE, message=FALSE, warning=FALSE}
-hist(trip_clean2$duration, main = "Histogram of Trip Duration", xlab = "Trip Duration in Seconds")
-```
+Outliers were identified using the equation 1.5 x IQR + Q3 for identifying the upper limits and 1.5 x IQR - Q1 for identifying the lower limits. There were approximately 65,195 outliers if the upper and lower limits were to be removed. To prevent loss of a massive number of data points the outliers were identified and reassigned to be the upper and lower limits as opposed to removing them entirely. A histogram of duration trip frequency was created to examine the distribution and to check for any extreme skewedness **(Figure 2)**. Using the “describe” function from the “ Hmisc” package a final check of the data was done to ensure outliers had been addressed. After modifying outliers to be either upper or lower limits, the new mean of trip duration was 598.9 seconds. The modified trip data set was named “trip_clean2” and saved as a RDS file for later use.
 
 ## **Exploratory Data Analysis for Weather Dataset**
 
-```{r EDA_weather, echo=FALSE, message=FALSE, warning=FALSE}
+```{r EDA_weather, message=FALSE, warning=FALSE, include=FALSE}
 
 #Uploading weather.dataset and assigning to weather_df object
 weather_df <- read.csv("weather.csv")
@@ -241,13 +240,11 @@ To initiate our exploration of the weather.csv file, the “glimpse” function 
 ### *Analyzing categorical variables*
 
 ```{r weath_cat, message=FALSE, warning=FALSE, include=FALSE}
-weath_plot1 <- freq(weather_df_1)
+freq(weather_df_1)
 ```
 
 
-The next approach to the exploratory analysis involved performing an assessment of the categorical data through the “freq” function. There were only a few categorical variables assessed, these encompassed the cloud_cover, events, zip_code and city variables and the most relevant plots are shown here. The output revealed that there were 9 levels of the cloud_cover variable, ranging in frequency with 0-cloud cover being the most frequent and 8-cloud_cover category as being the least frequent as shown in **Figure 5A**. In addition, the events variable indicated that 80.71% (representing 1473 data values) of the data was composed of NA-values, with the next most frequent events composing of rain and fog. Lastly, there were 5 levels associated with the cities, related to the 5 levels of zipcodes, which are evenly distributed in frequency, as shown by **Figure 5B**. 
-
-#### **Figure 5:** *Assessment of Categorical Variables.* A) Frequency of Weather Events (Top) B) Frequency of Dates for Each City (Bottom).
+#### **Figure 3:** *Assessment of Categorical Variables.* A) Frequency of Weather Events (Top) B) Frequency of Dates for Each City (Bottom).
 
 ```{r weather_1, echo=FALSE}
 freq(weather_df_1)
@@ -257,17 +254,19 @@ freq(weather_df_1)
 
 ![Frequency of Dates](images_Olivia_A5/image_2.png)
 
+The next approach to the exploratory analysis involved performing an assessment of the categorical data through the “freq” function. There were only a few categorical variables assessed, these encompassed the cloud_cover, events, zip_code and city variables and the most relevant plots are shown here. The output revealed that there were 9 levels of the cloud_cover variable, ranging in frequency with 0-cloud cover being the most frequent and 8-cloud_cover category as being the least frequent as shown in **Figure 3A**. In addition, the events variable indicated that 80.71% (representing 1473 data values) of the data was composed of NA-values, with the next most frequent events composing of rain and fog. Lastly, there were 5 levels associated with the cities, related to the 5 levels of zipcodes, which are evenly distributed in frequency, as shown by **Figure 3B**. 
+
 ### *Analyzing Numerical Variables*
 
-After assessing the categorical variables, the variables remaining were numerical in form, and were thus explored through the plot_num function. For this function, barplots were provided for all the numerical variables, which helped us develop initial insights into each of variables as can be seen in **Figure 6**. The minimum-visibility (miles), maximum-gust-speed (mph) variables, along with max_gust_speed_mph and precipitation_inches variables show relatively skewed and unbalanced distributions which can be attributed to the presence of outliers that would need to be removed, supporting previous analyses. The remaining numerical variables seem to have a relatively normal distribution, without any discerning outliers. 
+#### **Figure 4:** *Assessment of Numerical Variables.* The minimum-visibility (miles), maximum-gust-speed (mph), max_gust_speed_mph and precipitation_inches variables display skewed-distributions.
 
 
-#### **Figure 6:** *Assessment of Numerical Variables.* The minimum-visibility (miles), maximum-gust-speed (mph), max_gust_speed_mph and precipitation_inches variables display skewed-distributions.
-
-
-```{r weather_2, echo=FALSE, message=FALSE, warning=FALSE}
+```{r weather_2, message=FALSE, warning=FALSE, include=FALSE}
 plot_num(weather_df_1)
 ```
+
+![](images_Olivia_A5/weather_num.png)
+After assessing the categorical variables, the variables remaining were numerical in form, and were thus explored through the plot_num function. For this function, barplots were provided for all the numerical variables, which helped us develop initial insights into each of variables as can be seen in **Figure 4**. The minimum-visibility (miles), maximum-gust-speed (mph) variables, along with max_gust_speed_mph and precipitation_inches variables show relatively skewed and unbalanced distributions which can be attributed to the presence of outliers that would need to be removed, supporting previous analyses. The remaining numerical variables seem to have a relatively normal distribution, without any discerning outliers. 
 
 After plotting the numerical variables, the profiling-num function was performed to obtain an understanding of each variable’s distribution and range. This function demonstrated that there is a high standard deviation for the max_temperature_f, mean_temperature_f, min_temperature_f, max_wind_Speed_mph and max_gust_speed_mph variables. In addition, the variation coefficient demonstrated that the precipitation_inches variable is associated with more variance as opposed to the remaining variables that are centered around the mean, inferring less accuracy associated with this variable if it were to be chosen as a possible predictor. The skewness metric informs on the measure of asymmetry, and this function demonstrated that the variables of max_visibility_miles, mean_visibility_miles, max_wind_Speed_mph, max_gust_speed_mph and precipitation_inches variables have greater skewness-values and therefore greater likelihood of observing outliers in these variables. The kurtosis variable describes the distribution for the tails, where higher number indicates presence of outliers, and this was demonstrated by the higher values shown for the max_visibility_miles, mean_visibility_miles, max_wind_Speed_mph, max_gust_speed_mph and precipitation_inches variables. There was also a high IQR range for the max_temperature_f, mean_temperature_f, and min_temperature_f variables obtained.  
 
@@ -278,12 +277,6 @@ The describe function was used to obtain an overall overview of both the numeric
 
 ```{r outliers_weather, message=FALSE, warning=FALSE, include=FALSE}
 #Outlier Removal for Weather
-
-#loading libraries
-library(tidyverse)
-library(dplyr)
-library(lubridate)
-library(stats)
 
 #reading in weather and data, assigning to weather_df object
 weather_df <- readRDS("weather_transform.rds")
@@ -400,9 +393,6 @@ The previous exploratory analyses were helpful in uncovering the variables that 
 ## **Outliers for the Station Dataset**
 
 ```{r station_outliers, include=FALSE}
-#Importing libraries
-library(tidyverse)
-library(dplyr)
 
 #reading in station file 
 station_df <- read.csv("station.csv")
@@ -431,15 +421,11 @@ unique(unique_stations_end$end_station_name)
 Alongside the weather and data-files, the station file was also examined. With the structure function, the station file was found to provide many insights. To note, the id-variables were correctly coded as numeric and station name and city variables were correctly coded in character form. Additionally, the latitude and longitude variables were also correctly coded as numeric alongside the dock-count variable. However, the installation-dates were coded as characters. In order to identify any outliers in association to the main trip-file, the number of unique rows was determined, which was retrieved to be 70. After this, the number of unique stations was determined within the trip-file was determined by using the end-station-name, although this could have been replaced with start-station-name. This resulted in the total output of 74 unique values. This value’s discrepancy with the value from the station file suggested that there were 4 additional values that had been improperly coded in the trip-data file. In order to determine which station-names had been improperly coded in the trip-data, an anti-join function was applied with the trip-data and the station-file data to determine which station-names did not match with the station-data. This function found that the San Jose Government Center,  Broadway at Main, Washington at Kearny and Post at Kearny values had not been provided in the station-data and must have been therefore, been improperly coded in the trip-file data.   
 
 
-# **Rush-Hours and 10-Most Frequent Starting/Ending Stations**
+## **Rush-Hours and 10-Most Frequent Starting/Ending Stations**
 
 ### *Establishing the Highest Volume Hours on Weekdays*
 
 ```{r vol_weekds, message=FALSE, warning=FALSE, include=FALSE}
-library(tidyverse)
-library(dplyr)
-library(lubridate)
-
 trip_clean2<- readRDS("trip_clean2.rds")
 
 # Establish the highest volume hours on weekdays. Use to build 'rush hours' into their model (lubridate package).
@@ -459,12 +445,24 @@ rush_hours <- trip_clean2 %>%
   mutate(hrs = hour(mdy_hm(start_date))) %>%
   group_by(hrs)
  
-# Est highest vol hours for each weekday with histogram
-hist(rush_hours$hrs, main = "Histogram of Rush Hours During Weekdays", xlab = "Hour of Day", xlim = c(0,24))
-
-# And using a table
+# Examining rush hours using a table
 table(rush_hours$hrs)
+```
 
+#### **Figure 5:** *Histogram representing the most frequent times to start trips.* Hours of 8:00 - 8:59 am, 5:00 - 5:59pm, and 9:00 - 9:59 am are the most frequent times for riders to start their trip on weekdays.
+
+```{r hist_rush_hours, include=FALSE}
+hist(rush_hours$hrs, main = "Histogram of Rush Hours During Weekdays", xlab = "Hour of Day", xlim = c(0,24))
+```
+![](images_Olivia_A5/hist_2.png)
+The modified “trip_clean2.rds” was imported and will be the main analysis on the trip data set moving forward. In order to establish highest volume hours on weekdays, the start and end trip dates first had to be recognizable as dates. Using the “as.POSIXct” function the dates were converted from characters to dates. A new data frame called “rush_hours” was created, and using the “tidyverse” package, weekends, which were assigned value of 1 (for Sunday) and 7 (for Saturday) using the “wday” function, were filtered out from the starting dates in the data frame. A new column of hours, corresponding to the time in the starting dates column was created and data was grouped by starting hour. Through closer investigation by the “table” function and by using a histogram to model the data, the hours of 8:00 - 8:59am, 5:00 - 5:59pm, and 9:00 - 9:59am were the most popular times to start trips on weekdays **(Figure 5)**. Starting times were chosen to represent rush hours as this would be the times that customers were picking up bikes and would therefore be the times when the shop is most busy.
+
+Rush hours of 8:00 - 8:59 am, 5:00 - 5:59pm, and 9:00 - 9:59 am on weekdays are expected values as they closely align with the workday patterns of the average 9:00am to 5:00pm worker. In addition, the least common times to start a trip are between the hours of 1:00am - 4:00 am, which are hours when most people tend to be asleep. 
+
+## *Determining the 10 Most Frequent Starting and Ending Stations on Weekdays*
+
+
+```{r vol_weekds2, include=FALSE}
 # Determine the 10 most frequent starting stations and ending stations during the ‘rush hours’.
 
 # Most frequent starting stations during rush hours on weekdays
@@ -479,7 +477,21 @@ rush_hours2 <- trip_clean2 %>%
 
 rush_hours2_tb <- table(rush_hours2$start_station_name)
 
-rush_hours2_tb[order(rush_hours2_tb,decreasing = TRUE)]
+rush_hours2_tb1 <- head(rush_hours2_tb[order(rush_hours2_tb,decreasing = TRUE)],10)
+
+```
+
+#### **Table 3:** *Ten most frequent starting stations on weekdays.* Frequency of rides represents the numbers of trips left at each starting station during rush hours on weekdays.
+
+![](images_Olivia_A5/tb3.png)
+
+
+In order to determine the 10 most frequent starting stations on weekdays during rush hours, the same steps were followed as to establish the rush hours for ending stations. The data frame was then grouped by starting station name and then only trips leaving at hours between 8:00 - 8:59 am, 9:00 - 9:59 am and 5:00 - 5:59 pm were included in the analysis. The starting stations and their corresponding frequencies were then put in table format and ordered from most to least frequent in terms of number of trips left during the previously specified hours. The top 10 starting stations at rush hours were:  San Francisco Caltrain (Townsend at 4th), San Francisco Caltrain 2 (330 Townsend), Temporary Transbay Terminal (Howard at Beale), Harry Bridges Plaza (Ferry Building), Steuart at Market, 2nd at Townsend, Market at Sansome, Townsend at 7th, Beale at Market, and Market at 10th **(Table 3)**.
+
+
+#### **Table 4:** *Ten most frequent ending stations on weekdays.* Frequency of rides represents the numbers of trips arriving at each ending station during rush hours on weekdays.
+
+```{r freq_end_weekd, include=FALSE, paged.print=FALSE}
 
 # Most frequent ending stations during rush hours on weekdays
 # Determine rush hours for ending stations
@@ -498,46 +510,18 @@ rush_hours3 %>%
   filter(hrs == 8| hrs == 17 | hrs == 9)
   
 rush_hours3_tb <- table(rush_hours3$end_station_name)
-
-rush_hours3_tb[order(rush_hours3_tb,decreasing = TRUE)]
+rush_hours3_tb1 <- head(rush_hours3_tb[order(rush_hours3_tb,decreasing = TRUE)],10)
 ```
 
-The modified “trip_clean2.rds” was imported and will be the main analysis on the trip data set moving forward. In order to establish highest volume hours on weekdays, the start and end trip dates first had to be recognizable as dates. Using the “as.POSIXct” function the dates were converted from characters to dates. A new data frame called “rush_hours” was created, and using the “tidyverse” package, weekends, which were assigned value of 1 (for Sunday) and 7 (for Saturday) using the “wday” function, were filtered out from the starting dates in the data frame. A new column of hours, corresponding to the time in the starting dates column was created and data was grouped by starting hour. Through closer investigation by the “table” function and by using a histogram to model the data, the hours of 8:00 - 8:59am, 5:00 - 5:59pm, and 9:00 - 9:59am were the most popular times to start trips on weekdays **(Figure 7)**. Starting times were chosen to represent rush hours as this would be the times that customers were picking up bikes and would therefore be the times when the shop is most busy with customers.
+![](images_Olivia_A5/tb4.png)
 
-#### **Figure 7:** *Histogram representing the most frequent times to start trips.* Hours of 8:00 - 8:59 am, 5:00 - 5:59pm, and 9:00 - 9:59 am are the most frequent times for riders to start their trip on weekdays.
+To determine the 10 most frequent ending stations during rush hours on weekdays the same process to determine rush hours for starting stations was followed. This analysis returned the same rush hours at the ending stations as the starting stations being: 8:00 - 8:59 am, 9:00 - 9:59 am and 5:00 - 5:59 pm. The new data frame for frequencies of ending stations during weekdays was then filtered to only include rush hours and then made into a table, using the “table” function and ordered from most to least frequent. In order, the top 10 most frequent ending stations during rush hours on weekdays were: San Francisco Caltrain (Townsend at 4th), San Francisco Caltrain 2 (330 Townsend), Market at Sansome, Harry Bridges Plaza (Ferry Building), 2nd at Townsend, Townsend at 7th, Temporary Transbay Terminal (Howard at Beale), Steuart at Market, Embarcadero at Sansome, and Powell Street BART **(Table 4)**. 
 
-```{r his_weekdays, echo=FALSE}
-hist(rush_hours$hrs, main = "Histogram of Rush Hours During Weekdays", xlab = "Hour of Day", xlim = c(0,24))
-```
-
-
-Rush hours of 8:00 - 8:59 am, 5:00 - 5:59pm, and 9:00 - 9:59 am on weekdays are expected values as they closely align with the workday patterns of the average 9:00am to 5:00pm worker. In addition, the least common times to start a trip are between the hours of 1:00am - 4:00 am, which are hours when most people tend to be asleep. 
-
-## *Determining the 10 Most Frequent Starting and Ending Stations on Weekdays*
-
-In order to determine the 10 most frequent starting stations on weekdays, the same steps were followed as to establish the rush hours for ending stations. The data frame was then grouped by starting station name and then only trips leaving at hours between 8:00 - 8:59 am, 9:00 - 9:59 am and 5:00 - 5:59 pm were included in the analysis. The starting stations and their corresponding frequencies were then put in table format and ordered from most to least frequent in terms of number of trips left during the previously specified hours. The top 10 starting stations at rush hours were:  San Francisco Caltrain (Townsend at 4th), San Francisco Caltrain 2 (330 Townsend), Temporary Transbay Terminal (Howard at Beale), Harry Bridges Plaza (Ferry Building), Steuart at Market, 2nd at Townsend, Market at Sansome, Townsend at 7th, Beale at Market, and Market at 10th **(Table 1)**.
-
-
-#### **Table 1:** *Ten most frequent starting stations on weekdays.* Frequency of rides represents the numbers of trips left at each starting station during rush hours on weekdays.
-
-```{r freq_start_weekd, echo=FALSE}
-rush_hours2_tb <- table(rush_hours2$start_station_name)
-head(rush_hours2_tb[order(rush_hours2_tb,decreasing = TRUE)],10)
-```
-
-To determine the 10 most frequent ending stations during rush hours on weekdays the same process to determine rush hours for starting stations was followed. This analysis returned the same rush hours at the ending stations as the starting stations being: 8:00 - 8:59 am, 9:00 - 9:59 am and 5:00 - 5:59 pm. The new data frame for frequencies of ending stations during weekdays was then filtered to only include rush hours and then made into a table, using the “table” function and ordered from most to least frequent. In order, the top 10 most frequent ending stations during rush hours on weekdays were: San Francisco Caltrain (Townsend at 4th), San Francisco Caltrain 2 (330 Townsend), Market at Sansome, Harry Bridges Plaza (Ferry Building), 2nd at Townsend, Townsend at 7th, Temporary Transbay Terminal (Howard at Beale), Steuart at Market, Embarcadero at Sansome, and Powell Street BART **(Table 2)**. 
-
-#### **Table 2:** *Ten most frequent ending stations on weekdays.* Frequency of rides represents the numbers of trips arriving at each ending station during rush hours on weekdays.
-
-```{r freq_end_weekd, echo=FALSE}
-rush_hours3_tb <- table(rush_hours3$end_station_name)
-head(rush_hours3_tb[order(rush_hours3_tb,decreasing = TRUE)],10)
-```
-
-
-Apart from a few discrepancies, the most frequent starting and ending stations on weekdays appeared to mostly align with one another, which is to be expected. Specifically, the ending stations that were not included in the top 10 starting stations were Powell Street BART and Embarcadero at Sansome. Conversely, the two starting stations that were not included in the top 10 ending stations were Beale at Market and Market at 10th **(Table 1-2)**.
+Apart from a few discrepancies, the most frequent starting and ending stations on weekdays appeared to mostly align with one another, which is to be expected. Specifically, the ending stations that were not included in the top 10 starting stations were Powell Street BART and Embarcadero at Sansome. Conversely, the two starting stations that were not included in the top 10 ending stations were Beale at Market and Market at 10th **(Table 3-4)**.
 
 ## *Determining the 10 Most Frequent Starting and Ending Stations on Weekends*
+
+#### **Table 5:** *Ten most frequent starting stations on weekend.* Frequency of rides represents the numbers of trips beginning at each starting station during weekends.
 
 ```{r vol_weekes, include=FALSE}
 # Most frequent starting stations on weekends
@@ -552,8 +536,16 @@ rush_hours_wkend <- trip_clean2 %>%
   group_by(start_station_name)
 
 rush_hours_wkend_tb <- table(rush_hours_wkend$start_station_name)
-rush_hours_wkend_tb[order(rush_hours_wkend_tb,decreasing = TRUE)]
+rush_hours_wkend_tb1 <- head(rush_hours_wkend_tb[order(rush_hours_wkend_tb,decreasing = TRUE)],10)
+```
 
+![](images_Olivia_A5/tb5.png)
+
+The process for determining the most frequent stations on weekends was largely like the previous analysis except data was filtered to remove weekdays instead of weekends. A new data frame called “rush_hours_wkend” was created, and using the “tidyverse” package, weekdays, which are assigned values of 1 (Monday) to 6 (Friday) were filtered out. The 10 most frequent starting stations on weekends were: Harry Bridges Plaza (Ferry Building), Embarcadero at Sansome, Market at 4th, Embarcadero at Bryant, 2nd at Townsend, Powell Street BART, San Francisco Caltrain (Townsend at 4th), Grant Avenue at Columbus Avenue, Market at Sansome, and Powell at Post (Union Square) **(Table 5)**. 
+
+#### **Table 6:** *Ten most frequent ending stations on weekend.* Frequency of rides represents the numbers of trips finishing at each end station during on weekends.
+
+```{r freq_end_weeke, include=FALSE}
 # Most frequent ending stations on weekends
 rush_hours_wkend2 <- trip_clean2 %>%
   mutate(end_date_for = mdy_hm(end_date)) %>%
@@ -564,38 +556,25 @@ rush_hours_wkend2 <- trip_clean2 %>%
   group_by(end_station_name)
 
 rush_hours_wkend2_tb <- table(rush_hours_wkend2$end_station_name)
-rush_hours_wkend2_tb[order(rush_hours_wkend2_tb,decreasing = TRUE)]
+rush_hours_wkend2_tb1 <- head(rush_hours_wkend2_tb[order(rush_hours_wkend2_tb,decreasing = TRUE)],10)
 ```
 
 
-The process for determining the most frequent stations on weekends was largely like the previous analysis except data was filtered to remove weekdays instead of weekends. A new data frame called “rush_hours_wkend” was created, and using the “tidyverse” package, weekdays, which are assigned values of 1 (Monday) to 6 (Friday) were filtered out. The 10 most frequent starting stations on weekends were: Harry Bridges Plaza (Ferry Building), Embarcadero at Sansome, Market at 4th, Embarcadero at Bryant, 2nd at Townsend, Powell Street BART, San Francisco Caltrain (Townsend at 4th), Grant Avenue at Columbus Avenue, Market at Sansome, and Powell at Post (Union Square) **(Table 3)**. 
+![](images_Olivia_A5/tb6.png)
 
-#### **Table 3:** *Ten most frequent starting stations on weekend.* Frequency of rides represents the numbers of trips beginning at each starting station during weekends.
-
-```{r freq_start_weeke, echo=FALSE}
-rush_hours_wkend_tb <- table(rush_hours_wkend$start_station_name)
-head(rush_hours_wkend_tb[order(rush_hours_wkend_tb,decreasing = TRUE)],10)
-```
-The analysis of the most frequent end stations during weekends was done in the same way as the previous analysis, however, with the replacement of starting station to ending stations data from “trip_clean2” data set. Moreover, the results indicated a large portion of most frequent stations to be very similar to the starting station analysis, however, with slightly different ordering:  Harry Bridges Plaza (Ferry Building), Embarcadero at Sansome, Market at 4th, Embarcadero at Bryant, 2nd at Townsend, Powell Street BART, San Francisco Caltrain (Townsend at 4th), Grant Avenue at Columbus Avenue, Market at Sansome, and Powell at Post (Union Square) **(Table 4)**.
-
-#### **Table 4:** *Ten most frequent ending stations on weekend.* Frequency of rides represents the numbers of trips finishing at each end station during on weekends.
-
-```{r freq_end_weeke, echo=FALSE}
-rush_hours_wkend2_tb <- table(rush_hours_wkend2$end_station_name)
-head(rush_hours_wkend2_tb[order(rush_hours_wkend2_tb,decreasing = TRUE)],10)
-```
-
+The analysis of the most frequent end stations during weekends was done in the same way as the previous analysis, however, with the replacement of starting station to ending stations data from “trip_clean2” data set. Moreover, the results indicated a large portion of most frequent stations to be very similar to the starting station analysis, however, with slightly different ordering:  Harry Bridges Plaza (Ferry Building), Embarcadero at Sansome, Market at 4th, Embarcadero at Bryant, 2nd at Townsend, Powell Street BART, San Francisco Caltrain (Townsend at 4th), Grant Avenue at Columbus Avenue, Market at Sansome, and Powell at Post (Union Square) **(Table 6)**.
 
 Overall, the most frequent starting/ending stations on weekends and weekdays appeared to closely align with one another. Interestingly, there appears to be a slight discrepancy in stations that are more popular on weekends versus weekdays. For example, some of the top 10 starting stations for weekends included Grant Avenue at Columbus Avenue, Powell at Post (Union Square), Embarcadero at Bryant, Embarcadero at Sansome, and Market at 4th all of which were not included in the top 10 stations starting list on weekdays. For ending stations, top 10 that were not in the ending station analysis for weekends included: Market at 4th, Embarcadero at Bryant, and Grant Avenue at Columbus Avenue. It is worth noting that San Francisco Caltrain (Townsend at 4th) and 2nd at Townsend stations-maintained popularity throughout each analysis.
 
 ## **Calculating the Average Utilization of Bikes**
 
-In order to calculate the average utilization of bikes overall per month, a new data frame called “bike_utl”  from the “trip_clean2” data frame was created. Data was first grouped by month and then an additional data frame was created and using the “aggregate” function to sum the total trip durations corresponding to each month. An additional column for the number of days in each month was added as well and a column representing the total seconds in each month which multiplies the days in the month by the average seconds in a day (86400 seconds). The total bike utilization per month was calculated by adding a column that performs a division of total seconds used per month by the total seconds in the given month. Utilization results for each month can be seen in **Table 5**. 
+In order to calculate the average utilization of bikes overall per month, a new data frame called “bike_utl”  from the “trip_clean2” data frame was created. Data was first grouped by month and then an additional data frame was created and using the “aggregate” function to sum the total trip durations corresponding to each month. An additional column for the number of days in each month was added as well and a column representing the total seconds in each month which multiplies the days in the month by the average seconds in a day (86400 seconds). The total bike utilization per month was calculated by adding a column that performs a division of total seconds used per month by the total seconds in the given month. Utilization results for each month can be seen in **Table 7**. 
 
-#### **Table 5:** *Total bike utilization per month.* Average utilization was calculated by dividing total duration of trips per month in seconds divided by total time in month in seconds.
+#### **Table 7:** *Total bike utilization per month.* Average utilization was calculated by dividing total duration of trips per month in seconds divided by total time in month in seconds.
 
-```{r bike_utl, echo=FALSE}
+```{r bike_utl, include=FALSE, paged.print=FALSE}
 # Calculating average utilization of bikes total per month
+trip_clean2 <- readRDS("trip_clean2.rds")
 
 bike_utl <- trip_clean2 %>%
   mutate(start_date_for2 = mdy_hm(start_date)) %>%
@@ -604,17 +583,19 @@ bike_utl <- trip_clean2 %>%
 # Summed the duration in seconds of trip starting in each month 
 bike_utl2 <- aggregate(bike_utl$duration, by=list(mon = bike_utl$mon), FUN = sum)
 
-bike_utl2 %>%
+bike_utl2 <- bike_utl2 %>%
   # Add column for number of days per month 
  mutate(no_days_per_month = c(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)) %>%
   # Add column with calculation seconds per month (86400 sec / day)
   mutate(sec_per_month = no_days_per_month*86400) %>%
   mutate(avg_utl_per_mon = x/sec_per_month)
+
 ```
+![](images_Olivia_A5/tb7.png)
 
 ## **Calculating Weather and Bike Rental Patterns**
 
-```{r weather_trip_corr, include=FALSE}
+```{r weather_trip_corr, echo=FALSE}
 #Weather and Trip Correlation Plot
 
 #reading in station file 
@@ -646,15 +627,11 @@ trip_weather_corr <- left_join(trip_data_count,weather_df_2, by=c("start_date" =
 
 ```
 
-
 To determine the impact of weather patterns on bike-rental patterns, the cleaned and filtered data from the previous steps were retrieved. A dataframe with both the trip-data and station-data was then made, using the left_join function. This was performed in order to obtain information regarding the city of each station, which were necessary details since the weather-dataset contained weather patterns based on each city and zipcode, but not according to station-names. After creating this merged dataframe, the variables of id (id.x corresponding to the ID from the trip-dataset), bike-ids, station and end-station ids, subscription-type and zipcodes which were originally from the trip-dataframe were removed and the variables of id (id.y corresponding to the ID from the station-data), installation-date, start-station name, end-station-name, dock-count, long and lat columns were also removed. These variables were removed as they were irrelevant to the analysis of bike-rental frequency and weather-patterns. In order to then obtain the bike-rental frequency, the data was grouped by start-date and city to obtain the total number of counts of bikes used per day per city, as opposed to variables such as duration. It was important to stratify the data by city as well as date, as the weather-data was divided by city, not only date. Therefore, the next step involved joining this newly created dataframe containing the start-date, city, and number of trips per day information with the weather-dataframe. The unique-identifiers in this case were the variables of start-date/date and city. In order to perform correlation analysis with just the numerical variables, all character or factor variables such as start_date, events, and city character-variables were moved. Then, correlation analysis was performed for each of the cities. The events-variable was removed as it was a factor/character-value, and therefore was not included in the quantitative-correlation analysis. For the following correlation plots, freq refers to the number of trips completed per day. 
 
-For San Francisco as can be seen in **Figure 8**, a positive but weak correlation can be observed for the variables of max-temperature-f and mean-temperature, and a negative moderate correlation for precipitation inches, as well as a weaker negative correlation for maximum and minimum wing speed, and cloud-cover. 
+#### **Figure 6:** *Correlation Plot for San Francisco.*
 
-
-#### **Figure 8:** *Correlation Plot for San Francisco.*
-
-```{r cor_san_fran, echo=FALSE}
+```{r cor_san_fran, include=FALSE}
 #Correlation for San Francisco
 #creating dataframe for San Francisco city  
 san_fran <- as.data.frame(trip_weather_corr %>% filter(city == "San Francisco"))
@@ -671,12 +648,12 @@ san_fran <- san_fran %>%
 corrplot(cor(san_fran))
 
 ```
-For the city of Mountain View as can be seen in **Figure 9**, a positive but weak correlation can be seen for the variables of max-temperature-f and mean-temperature and weak negative correlations for the variables of max/mean wind speed, and gust speed. The variables of cloud-cover and precipitation inches demonstrate a marginally better, borderline moderate negative correlation. 
+![](images_Olivia_A5/san_fran_cor.png)
+For San Francisco as can be seen in **Figure 6**, a positive but weak correlation can be observed for the variables of max-temperature-f and mean-temperature, and a negative moderate correlation for precipitation inches, as well as a weaker negative correlation for maximum and minimum wing speed, and cloud-cover. 
 
-#### **Figure 9:** *Correlation Plot for Mountain View.*
+#### **Figure 7:** *Correlation Plot for Mountain View.*
 
-
-```{r cor_mount_view, echo=FALSE, message=FALSE, warning=FALSE}
+```{r cor_mount_view, include=FALSE}
 
 #mountain view city 
 mountain_view <- as.data.frame(trip_weather_corr %>% filter(city == "Mountain View"))
@@ -693,12 +670,15 @@ mountain_view <- mountain_view %>%
 corrplot(cor(mountain_view))
 
 ```
+![](images_Olivia_A5/mount_view_cor.png)
 
-The city of Palo Alto similarly showed a weak positive correlation for max and mean temperature, as well as for minimum visibility in miles, and a weak negative correlation for minimum visibility and precipitation inches, as well as for events-types and gust-speed. However, a moderate negative correlation for maximum and average wind speed, as well as cloud cover. Interestingly, there were not any variables that were insufficient for correlation analysis, seen by the lack of ‘?’ compared to the other plots for the other cities as seen in **Figure 10**. 
 
-#### **Figure 10:** *Correlation Plot for Palo Alto.*
+For the city of Mountain View as can be seen in **Figure 7**, a positive but weak correlation can be seen for the variables of max-temperature-f and mean-temperature and weak negative correlations for the variables of max/mean wind speed, and gust speed. The variables of cloud-cover and precipitation inches demonstrate a marginally better, borderline moderate negative correlation. 
 
-```{r cor_palo_alto, message=FALSE, warning=FALSE}
+
+#### **Figure 8:** *Correlation Plot for Palo Alto.*
+
+```{r cor_palo_alto, include=FALSE}
 #palo alto city 
 palo_alto_view <- as.data.frame(trip_weather_corr %>% filter(city == "Palo Alto"))
 palo_alto_view <- palo_alto_view %>%
@@ -713,13 +693,12 @@ palo_alto_view <- palo_alto_view %>%
 #displaying correlation values 
 corrplot(cor(palo_alto_view))
 ```
+![](images_Olivia_A5/palo_alto_cor.png)
+The city of Palo Alto similarly showed a weak positive correlation for max and mean temperature, as well as for minimum visibility in miles, and a weak negative correlation for minimum visibility and precipitation inches, as well as for events-types and gust-speed. However, a moderate negative correlation for maximum and average wind speed, as well as cloud cover. Interestingly, there were not any variables that were insufficient for correlation analysis, seen by the lack of ‘?’ compared to the other plots for the other cities as seen in **Figure 8**. 
 
+#### **Figure 9:** *Correlation Plot for Redwood City.*  
 
-As seen in **Figure 10**, which displays the correlation plot for Redwood City, there is only weak positive correlation shown for all variables, with the exception of average wind speed, which shows a borderline-moderate correlation. 
-
-#### **Figure 10:** *Correlation Plot for Redwood City.*  
-
-```{r cor_redwood_city, echo=FALSE, message=FALSE, warning=FALSE}
+```{r cor_redwood_city, include=FALSE}
 #Redwood City
 redwood_city <- as.data.frame(trip_weather_corr %>% filter(city == "Redwood City"))
 redwood_city <- redwood_city %>%
@@ -734,12 +713,12 @@ redwood_city <- redwood_city %>%
 #displaying correlation values 
 corrplot(cor(redwood_city))
 ```
+![](images_Olivia_A5/redwood_city_cor.png)
+As seen in **Figure 9**, which displays the correlation plot for Redwood City, there is only weak positive correlation shown for all variables, with the exception of average wind speed, which shows a borderline-moderate correlation. 
 
-For the town of San Jose as shown in **Figure 11**, there are weak positive correlations shown for the mean and minimum visibility variables, with borderline moderate correlation for the max/mean/min temperature variables. Moreover, a weak negative correlation for max/mean wind speeds and gust-speeds with cloud cover, and for precipitation inches is also seen. 
+#### **Figure 10:** *Correlation Plot for San Jose.*
 
-#### **Figure 11:** *Correlation Plot for San Jose*
-
-```{r cor_san_jose, echo=FALSE, message=FALSE, warning=FALSE}
+```{r cor_san_jose, include=FALSE}
 #San Jose City
 sanjose_city <- as.data.frame(trip_weather_corr %>% filter(city == "San Jose"))
 sanjose_city <- sanjose_city %>%
@@ -754,7 +733,8 @@ sanjose_city <- sanjose_city %>%
 #displaying correlation values 
 corrplot(cor(sanjose_city))
 ```
-
+![](images_Olivia_A5/san_jose_cor.png)
+For the town of San Jose as shown in **Figure 10**, there are weak positive correlations shown for the mean and minimum visibility variables, with borderline moderate correlation for the max/mean/min temperature variables. Moreover, a weak negative correlation for max/mean wind speeds and gust-speeds with cloud cover, and for precipitation inches is also seen. 
 
 To provide a summary of the weather patterns for all these plots, all the cities demonstrate a weak-positive correlation associated with the max/min/mean temperature variables where increased frequency of bike rides are associated with increased temperature. In addition, this correlation was also shown to be true for the max/minimum/mean visibility (miles) variables, where increased visibility is associated with increased frequency of bike rides. On the other hand, weak-negative correlations are demonstrated with the speed variables, where increasing speed is associated with lower frequency of bike rides. In addition to this, weak-negative correlations were exhibited for precipitation, where increased precipitation is associated with lower frequency of bike rides. Similar to this variable, greater-cloud-cover values being associated with lower frequency of bike rides. These trends were however not noticed in Redwood City, where increased frequency of bike rides were associated not only with greater temperatures but also, negative weather events such as greater wind-speed and greater precipitation or cloud-cover. 
 

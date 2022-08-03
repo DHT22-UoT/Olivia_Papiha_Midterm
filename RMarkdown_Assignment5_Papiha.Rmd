@@ -4,8 +4,8 @@ title: "Bay Area Bike Rental Operation Research - Analysis of Bicycle Trip and W
 author: "Papiha Joharapurkar (Group 5)"
 date: "2022-07-13"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -766,5 +766,12 @@ To provide a summary of the weather patterns for all these plots, all the cities
 The analysis concluded that the common rush hours during weekdays were 8:00 - 8:59 am, 9:00 - 9:59 am and 5:00 - 5:59pm. These results were consistent for both starting and ending stations and likely align with workday patterns of the average worker in the Bay Area. Overall, the bike starting and ending stations on weekdays aligned well. There were discrepancies in the most popular stations for weekends in comparison to weekdays. Specifically, the Market at 4th, Embarcadero at Bryant, and Grant Avenue at Columbus Avenue stations seemed to be busier on the weekends in comparison to weekdays. Interestingly, San Francisco Caltrain (Townsend at 4th) and 2nd at Townsend stations-maintained popularity throughout each analysis. In addition, an increase in utilization of bikes is seen in the months of July -- October. Conversely, a decrease in utilization was seen in December, January, and February. When it comes to the expected weather patterns, weather events thought to be associated with the months of July -- October include increased temperatures and greater visibility, along with lower wind-speeds and lower precipitation with the converse expected to present in December, January, and February. The analysis of weather patterns also supports the previous results, where greater frequency of bike rides were shown to be associated with positive or increasing values for temperatures and greater visibility as opposed to lower frequency with greater wind-speeds and precipitation values. However, due to the limitations of missing data which necessitated missing-value imputation for the weather and trip-information, further analysis to determine the impact of weather patterns on bicycle utilization could be helpful to inform maintenance decisions.
 
 
-
+```{r naina-comments, echo=FALSE}
+# All my comments pertaining to the rubric will be added in this chunk so as to not add something in the middle of your code.
+# .Rmd completeness - 2/2 Able to knit without any errors
+# Packages - 2/2 All necessary packages are explicitly loaded	
+# Text Formatting - 1/2 I think you could put your figure and table captions in italics or bold so that they are clearly separate from the main text of your report. Document is appropriately formatted with one level of headers and text.	
+# Output Formatting	- 2/2 Code outputs are properly formatted for printing/viewing. Outputs are disabled for appropriate chunks. Your correlation plots look great, not something my group thought to do and it adds a lot of insights to your report.
+# Code chunks	- 2/2 Code is chunked appropriately. Code chunks are named and options sets where necessary. Code is commented.	
+```
 
